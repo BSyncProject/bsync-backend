@@ -1,56 +1,18 @@
-import User from "./User";
-import Transaction from "./Transaction";
+import mongoose, { Schema, Document } from 'mongoose';
+import { Transaction, TransactionModel } from './Transaction'; 
+import { User } from './User';
 
-
-class Wallet {
-  private _transactionHistory: Transaction[];
-  private _owner: User;
-  private _balance: number;
-
-  constructor() {
-    this._transactionHistory = [];
-    this._owner = new User(); 
-    this._balance = 0;
-  }
-
-  get transactionHistory(): Transaction[] {
-    return this._transactionHistory;
-  }
-
-  set transactionHistory(transactionHistory: Transaction[]) {
-    this._transactionHistory = transactionHistory;
-  }
-
-  get owner(): User {
-    return this._owner;
-  }
-
-  set owner(owner: User) {
-    this._owner = owner;
-  }
-
-  
-  checkBalance(): number {
-    return this._balance;
-  }
-
-  deposit(amount: number): void {
-    if (amount <= 0) {
-      throw new Error('Amount must be greater than zero.');
-    }
-    this._balance += amount;
-  }
-
-  withdraw(amount: number): void {
-    if (amount <= 0) {
-      throw new Error('Amount must be greater than zero.');
-    }
-    if (amount > this._balance) {
-      throw new Error('Insufficient balance.');
-    }
-    this._balance -= amount;
-  }
-
+export interface Wallet extends Document {
+  transactionHistory: Transaction[];
+  owner: User;
+  balance: number;
 }
 
-export default Wallet;
+const walletSchema: Schema = new Schema({
+  transactionHistory: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }],
+  owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  balance: { type: Number, required: true },
+});
+
+export const WalletModel = mongoose.model<Wallet>('Wallet', walletSchema);
+

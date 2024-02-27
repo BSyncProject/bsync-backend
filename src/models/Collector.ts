@@ -1,29 +1,23 @@
-import Picker from "./Picker";
-import User from "./User";
+import mongoose, { Schema, Document } from 'mongoose';
+import { User } from './User'; 
+import { Picker, PickerModel } from './Picker'; 
 
-class Collector extends User {
-
-  private _serviceArea: string
-  private _picker: Picker
-
-  constructor(){
-    super()
-    this._serviceArea = "";
-    this._picker = new Picker();
-  }
-
-  set serviceArea(serviceArea: string){
-    this._serviceArea = serviceArea;
-  }
-
-  get serviceArea(): string{
-    return this._serviceArea;
-  }
-
-  set picker(picker: Picker){
-    this._picker = picker;
-  }
-  
+// Define interface for Collector document
+export interface Collector extends User, Document {
+  serviceArea: string;
+  picker: Picker;
 }
 
-export default Collector;
+const collectorSchema: Schema = new Schema({
+  username: { type: String, required: true },
+  password: { type: String, required: true },
+  email: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  name: { type: String, required: true },
+  wallet: { type: Schema.Types.ObjectId, ref: 'Wallet', required: true },
+  serviceArea: { type: String, required: true },
+  picker: { type: Schema.Types.ObjectId, ref: 'Picker', required: true },
+});
+
+export const CollectorModel = mongoose.model<Collector>('Collector', collectorSchema);
+

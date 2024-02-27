@@ -1,59 +1,23 @@
-import Collector from "./Collector"
+import mongoose, { Schema, Document } from 'mongoose';
+import { Collector, CollectorModel } from './Collector'; // Assuming Collector model is defined
 
-class Picker {
-  private _name: string;
-  private _address: string;
-  private _phoneNumber: string;
-  private _serviceArea: string;
-  private _collector: Collector;
-
-  constructor() {
-    this._name = '';
-    this._address = '';
-    this._phoneNumber = '';
-    this._serviceArea = '';
-    this._collector = new Collector();
-  }
-
-  get name(): string {
-    return this._name;
-  }
-
-  set name(name: string) {
-    this._name = name;
-  }
-
-  get address(): string {
-    return this._address;
-  }
-
-  set address(address: string) {
-    this._address = address;
-  }
-
-  get phoneNumber(): string {
-    return this._phoneNumber;
-  }
-
-  set phoneNumber(phoneNumber: string) {
-    this._phoneNumber = phoneNumber;
-  }
-
-  get serviceArea(): string {
-    return this._serviceArea;
-  }
-
-  set serviceArea(serviceArea: string) {
-    this._serviceArea = serviceArea;
-  }
-
-  get collector(): Collector {
-    return this._collector;
-  }
-
-  set collector(collector: Collector) {
-    this._collector = collector;
-  }
+// Define interface for Picker document
+export interface Picker extends Document {
+  name: string;
+  address: string;
+  phoneNumber: string;
+  serviceArea: string;
+  collector: Collector;
 }
 
-export default Picker
+// Define Mongoose schema for Picker
+const pickerSchema: Schema = new Schema({
+  name: { type: String, required: true },
+  address: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  serviceArea: { type: String, required: true },
+  collector: { type: Schema.Types.ObjectId, ref: 'Collector', required: true }, // Assuming Collector reference
+});
+
+// Create and export Mongoose model for Picker
+export const PickerModel = mongoose.model<Picker>('Picker', pickerSchema);
