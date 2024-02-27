@@ -17,7 +17,7 @@ class Collector extends User {
   }
 
   get serviceArea(): string{
-    return this._serviceArea
+    return this._serviceArea;
   }
 
   set picker(picker: Picker){
