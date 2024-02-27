@@ -1,51 +1,17 @@
-import Producer from "./Producer";
+import mongoose, { Schema, Document } from 'mongoose';
+import { Producer} from './Producer'; // Assuming Producer model is defined
 
-class Waste{
-
-  private _wasteType: string
-  private _quantity: string
-  private _location: string
-  private _producer: Producer
-
-  constructor() {
-    this._wasteType = "";
-    this._quantity = "";
-    this._location = "";
-    this._producer = new Producer();
-  }
-
-  get wasteType(): string {
-    return this._wasteType;
-  }
-
-  set wasteType(wasteType: string) {
-    this._wasteType = wasteType;
-  }
-
-  get quantity(): string {
-    return this._quantity;
-  }
-
-  set quantity(quantity: string) {
-    this._quantity = quantity;
-  }
-
-  get location(): string {
-    return this._location;
-  }
-
-  set location(location: string) {
-    this._location = location;
-  }
-
-  get producer(): Producer {
-    return this._producer;
-  }
-
-  set producer(producer: Producer) {
-    this._producer = producer;
-  }
-  
+export interface Waste extends Document {
+  quantity: string;
+  location: string;
+  producer: Producer;
 }
 
-export default Waste
+const wasteSchema: Schema = new Schema({
+  quantity: { type: String, required: true },
+  location: { type: String, required: true },
+  producer: { type: Schema.Types.ObjectId, ref: 'Producer', required: true },
+});
+
+export const WasteModel = mongoose.model<Waste>('Waste', wasteSchema);
+
