@@ -69,6 +69,8 @@ const loginCollector = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
+ 
+
 module.exports = {
   signUp,
   loginCollector,

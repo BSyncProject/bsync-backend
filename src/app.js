@@ -5,13 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
-const db_config_1 = require("./config/db.config");
 const collectorRouter = require(`${__dirname}/routes/collector.routes`);
 const producerRouter = require(`${__dirname}/routes/producer.routes`);
-dotenv_1.default.config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
@@ -28,7 +27,10 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something went wrong!');
 });
 const PORT = process.env.PORT || 3000;
-mongoose_1.default.connect(db_config_1.DATABASE_URL, {
+const DATABASE_URL = process.env.DATABASE_URI || "";
+console.log(PORT);
+console.log(DATABASE_URL);
+mongoose_1.default.connect(DATABASE_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })

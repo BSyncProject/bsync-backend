@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ProducerServices_1 = require("../services/ProducerServices");
 const tokenUtils_1 = require("../utils/tokenUtils");
 const AuthValidations_1 = require("../validations/producerValidations/AuthValidations");
+const servicesValidationSchema_1 = require("../validations/producerValidations/servicesValidationSchema");
+const ProducerServices_2 = require("../services/ProducerServices");
 const catchAsync = require('../utils/catchAsync');
 const signUpProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -50,7 +52,30 @@ const loginProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
         });
     }
 }));
+const postPWaste = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!req.producer) {
+            throw new Error("User not Authorized");
+        }
+        const { quantity, location, majority, imageLink, } = yield servicesValidationSchema_1.postWasteValidationSchema.validateAsync(req.body);
+        const waste = yield (0, ProducerServices_2.postWaste)({ quantity, majority, location, imageLink }, req.producer);
+        if (waste) {
+            res.status(200).json({
+                status: 'success',
+                message: "waste post successfully",
+                data: waste,
+            });
+        }
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: 'An error occurred'
+        });
+    }
+}));
 module.exports = {
     signUpProducer,
     loginProducer,
+    postPWaste,
 };

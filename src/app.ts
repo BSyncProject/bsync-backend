@@ -3,15 +3,14 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import mongoose, {ConnectOptions} from 'mongoose';
 import cors from 'cors';
-import {DATABASE_URL} from './config/db.config';
 
 const collectorRouter = require(`${__dirname}/routes/collector.routes`);
 const producerRouter = require(`${__dirname}/routes/producer.routes`)
 
-dotenv.config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
-
 
 
 app.use(bodyParser.json());
@@ -33,7 +32,11 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
 });
 
 const PORT = process.env.PORT || 3000;
+const DATABASE_URL = process.env.DATABASE_URI || "";
 
+
+console.log(PORT);
+console.log(DATABASE_URL);
 
 mongoose.connect(DATABASE_URL, {
   useNewUrlParser: true,

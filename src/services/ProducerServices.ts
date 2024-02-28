@@ -1,13 +1,16 @@
 import { Collector, CollectorModel } from '../models/Collector'; // Assuming Collector model is defined
 import { Producer } from '../models/Producer';
 import { Wallet } from '../models/Wallet';
+import { Waste, WasteModel } from '../models/Waste';
 import ProducerRepository from '../repository/ ProducerRepository';
 import WalletRepository from '../repository/WalletRepository';
 import bcrypt from 'bcrypt';
+import WasteRepository from '../repository/WasteRepository';
 
 
 const producerRepository = new ProducerRepository();
 const walletRepository = new WalletRepository();
+const wasteRepository = new WasteRepository();
 
 
 export async function signUp(signUpData: Partial<Producer>): Promise<Producer> {
@@ -76,3 +79,16 @@ const comparePasswords = async (plainPassword: string, hashedPassword: string): 
     return false; 
   }
 };
+
+export async function postWaste(wasteData: Partial<Waste>, producer: Producer): Promise<Waste>{
+
+  if(!producer){
+    throw new Error("Unknown User");
+  }
+
+  wasteData.producer = producer;
+
+  const waste: Waste = await wasteRepository.create(wasteData);
+  return waste;
+
+}

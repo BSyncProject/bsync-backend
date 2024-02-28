@@ -4,8 +4,11 @@ import {signToken} from '../utils/tokenUtils'
 
 import {
   signupProducerValidationSchema, 
-  loginProducerValidationSchema
+  loginProducerValidationSchema, 
 } from '../validations/producerValidations/AuthValidations';
+
+import { postWasteValidationSchema } from '../validations/producerValidations/servicesValidationSchema';
+import { postWaste } from '../services/ProducerServices';
 
 const catchAsync = require('../utils/catchAsync');
 
@@ -42,8 +45,6 @@ const signUpProducer = catchAsync(async (req: Request, res: Response) => {
 });
 
 
-
-
 const loginProducer = catchAsync(async (req: Request, res: Response) => {
 
   const {
@@ -70,7 +71,52 @@ const loginProducer = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
+interface CustomRequest extends Request {
+  producer?: any;
+}
+
+const postPWaste = catchAsync(async(req: CustomRequest, res: Response) => {
+
+  try {
+
+    if(!req.producer){
+      throw new Error("User not Authorized");
+    }
+  
+    const { 
+      quantity,
+      location,
+      majority,
+      imageLink,
+      
+    } = await postWasteValidationSchema.validateAsync(req.body);
+  
+    const waste = await postWaste({quantity, majority, location, imageLink}, req.producer);
+  
+    if (waste) {
+  
+      res.status(200).json({
+        status: 'success',
+        message: "waste post successfully",
+        data: waste,
+        
+      });
+
+    } 
+    
+  } catch(error: any) {
+
+    res.status(500).json({
+      status: 'failed',
+      message: 'An error occurred'
+    });
+
+  }
+  
+})
+
 module.exports = {
   signUpProducer,
   loginProducer,
+  postPWaste,
 };

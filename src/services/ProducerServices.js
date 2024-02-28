@@ -12,12 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.signUp = void 0;
+exports.postWaste = exports.login = exports.signUp = void 0;
 const _ProducerRepository_1 = __importDefault(require("../repository/ ProducerRepository"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const WasteRepository_1 = __importDefault(require("../repository/WasteRepository"));
 const producerRepository = new _ProducerRepository_1.default();
 const walletRepository = new WalletRepository_1.default();
+const wasteRepository = new WasteRepository_1.default();
 function signUp(signUpData) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!signUpData.password || !signUpData.username || !signUpData.email) {
@@ -77,3 +79,14 @@ const comparePasswords = (plainPassword, hashedPassword) => __awaiter(void 0, vo
         return false;
     }
 });
+function postWaste(wasteData, producer) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!producer) {
+            throw new Error("Unknown User");
+        }
+        wasteData.producer = producer;
+        const waste = yield wasteRepository.create(wasteData);
+        return waste;
+    });
+}
+exports.postWaste = postWaste;

@@ -28,6 +28,8 @@ const mongoose_1 = __importStar(require("mongoose"));
 const wasteSchema = new mongoose_1.Schema({
     quantity: { type: String, required: true },
     location: { type: String, required: true },
+    imageLink: { type: String },
+    majority: { type: String, required: true },
     producer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Producer', required: true },
 });
 exports.WasteModel = mongoose_1.default.model('Waste', wasteSchema);
