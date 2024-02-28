@@ -8,5 +8,6 @@ export interface User{
   phoneNumber: string;
   name: string;
   wallet: Wallet
+  address: string;
 
 }

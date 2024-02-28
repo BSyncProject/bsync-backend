@@ -2,10 +2,10 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { User } from './User'; 
 import { Picker, PickerModel } from './Picker'; 
 
-// Define interface for Collector document
 export interface Collector extends User, Document {
   serviceArea: string;
-  picker: Picker;
+  picker: Picker[];
+  isAgent: boolean
 }
 
 const collectorSchema: Schema = new Schema({
@@ -16,8 +16,9 @@ const collectorSchema: Schema = new Schema({
   name: { type: String, required: true },
   wallet: { type: Schema.Types.ObjectId, ref: 'Wallet', required: true },
   serviceArea: { type: String, required: true },
-  picker: { type: Schema.Types.ObjectId, ref: 'Picker', required: true },
+  picker: [{ type: Schema.Types.ObjectId, ref: 'Picker'}],
+  isAgent: {type: Boolean, default: false},
+  address: {type: String, required: true},
 });
 
 export const CollectorModel = mongoose.model<Collector>('Collector', collectorSchema);
-

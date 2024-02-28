@@ -1,0 +1,1 @@
+export const DATABASE_URL = process.env.DATABASE_URI || 'mongodb://localhost:27017/TestDBsync';

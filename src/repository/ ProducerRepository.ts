@@ -7,6 +7,23 @@ class ProducerRepository {
     return newProducer;
   }
 
+
+  async check(username: string, email: string){
+
+    const producer = await this.findOne(username);
+    if(producer){
+      return producer;
+    } else {
+      return ProducerModel.findOne({email: email});
+    }
+
+  }
+
+  async findOne(username: string){
+    const foundProducer =  ProducerModel.findOne({username: username});
+    return foundProducer;
+  }
+
   async getAll(): Promise<Producer[]> {
     const allProducers = await ProducerModel.find().populate('waste').exec();
     return allProducers;
