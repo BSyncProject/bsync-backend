@@ -13,7 +13,6 @@ const ProducerServices_1 = require("../services/ProducerServices");
 const tokenUtils_1 = require("../utils/tokenUtils");
 const AuthValidations_1 = require("../validations/producerValidations/AuthValidations");
 const servicesValidationSchema_1 = require("../validations/producerValidations/servicesValidationSchema");
-const ProducerServices_2 = require("../services/ProducerServices");
 const catchAsync = require('../utils/catchAsync');
 const signUpProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -58,7 +57,7 @@ const postPWaste = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fu
             throw new Error("User not Authorized");
         }
         const { quantity, location, majority, imageLink, } = yield servicesValidationSchema_1.postWasteValidationSchema.validateAsync(req.body);
-        const waste = yield (0, ProducerServices_2.postWaste)({ quantity, majority, location, imageLink }, req.producer);
+        const waste = yield (0, ProducerServices_1.postWaste)({ quantity, majority, location, imageLink }, req.producer);
         if (waste) {
             res.status(200).json({
                 status: 'success',
@@ -68,14 +67,104 @@ const postPWaste = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fu
         }
     }
     catch (error) {
-        res.status(500).json({
+        res.status(error.status).json({
             status: 'failed',
-            message: 'An error occurred'
+            message: 'An error occurred: ' + `${error.message}`
         });
     }
 }));
+const deleteWastes = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const producer = checkProducerIsProvided(req);
+        const { waste_id, } = yield servicesValidationSchema_1.deleteWasteValidationSchema.validateAsync(req.body);
+        const waste = yield (0, ProducerServices_1.deleteWaste)(waste_id, producer);
+        if (waste) {
+            res.status(200).json({
+                status: 'success',
+                message: waste,
+            });
+        }
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const withdrawMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        checkProducerIsProvided(req);
+        const { amount, accountNumber, bank_code, name, } = yield servicesValidationSchema_1.withdrawalValidationSchema.validateAsync(req.body);
+        const response = yield (0, ProducerServices_1.makeWithdrawal)(name, accountNumber, bank_code, amount, req.producer);
+        if (!response) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "withdrawal in queue",
+            data: response,
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const depositMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const producer = checkProducerIsProvided(req);
+        const { amount, email, } = yield servicesValidationSchema_1.depositValidationSchema.validateAsync(req.body);
+        const response = yield (0, ProducerServices_1.makeDeposit)(amount, email);
+        if (!response) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: response,
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const verifyDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const producer = checkProducerIsProvided(req);
+        const { reference, } = yield servicesValidationSchema_1.depositValidationSchema.validateAsync(req.body);
+        const response = yield (0, ProducerServices_1.verifyProducerDeposit)(reference, producer);
+        if (!response) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: response,
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+function checkProducerIsProvided(req) {
+    if (!req.producer) {
+        throw new Error("User not Authorized");
+    }
+    return req.producer;
+}
 module.exports = {
     signUpProducer,
     loginProducer,
     postPWaste,
+    deleteWastes,
+    withdrawMoney, //See adeola at palace, ask samuel sola.
+    depositMoney,
+    verifyDeposit,
 };

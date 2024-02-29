@@ -9,5 +9,6 @@ export interface User{
   name: string;
   wallet: Wallet
   address: string;
+  dateRegistered: string;
 
 }

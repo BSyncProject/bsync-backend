@@ -7,6 +7,8 @@ export interface Waste extends Document {
   imageLink: string; 
   producer: Producer;
   majority: string;
+  datePosted: Date;
+  isSold: boolean;
 }
 
 const wasteSchema: Schema = new Schema({
@@ -15,6 +17,8 @@ const wasteSchema: Schema = new Schema({
   imageLink: { type: String},
   majority: { type: String, required: true },
   producer: { type: Schema.Types.ObjectId, ref: 'Producer', required: true },
+  datePosted: {type: String},
+  isSold: {type: Boolean},
 });
 
 export const WasteModel = mongoose.model<Waste>('Waste', wasteSchema);

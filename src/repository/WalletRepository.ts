@@ -6,6 +6,7 @@ class WalletRepository {
     return newWallet;
   }
 
+
   async getAll(): Promise<Wallet[]> {
     const allWallets = await WalletModel.find().populate('transactionHistory').populate('owner').exec();
     return allWallets;

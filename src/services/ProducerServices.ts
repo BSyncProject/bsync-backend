@@ -1,4 +1,4 @@
-import { Collector, CollectorModel } from '../models/Collector'; // Assuming Collector model is defined
+import { Collector, CollectorModel } from '../models/Collector'; 
 import { Producer } from '../models/Producer';
 import { Wallet } from '../models/Wallet';
 import { Waste, WasteModel } from '../models/Waste';
@@ -87,8 +87,79 @@ export async function postWaste(wasteData: Partial<Waste>, producer: Producer): 
   }
 
   wasteData.producer = producer;
+  wasteData.datePosted = new Date();
 
   const waste: Waste = await wasteRepository.create(wasteData);
   return waste;
 
 }
+
+
+export async function deleteWaste(waste_id: Partial<string>, producer: Producer) {
+
+  const waste = await wasteRepository.getById(waste_id)
+  if(waste?.producer == producer){
+    wasteRepository.delete(waste._id);
+    return "Waste deleted successfully";
+
+  } 
+  throw new Error("Unauthorized");
+}
+
+export async function makeDeposit(amount: number, email: string): Promise<any>{
+
+  const depositResponse = await deposit(amount, email);
+
+  if(!depositResponse.data){
+    throw new Error("An error occurred, Try again later")
+  }
+  const {createdData} = depositResponse.data
+  return createdData;
+
+}
+
+export async function verifyProducerDeposit(reference: string, producer: Producer): Promise<any> {
+
+  const data = await verifyDeposit(reference);
+
+  if (!data.data && !(data.message == "Verification successful")){
+
+    const wallet = producer.wallet;
+    wallet.balance = wallet.balance += data.data.amount;
+    walletRepository.update(wallet._id, wallet);
+
+  }
+
+  return data;
+
+}
+
+export async function makeWithdrawal(name: string, accountNumber: string, bank_code: string, amount: number, producer: Producer): Promise<any>{
+
+  const withdrawData = await startWithdrawal(name, accountNumber, bank_code, amount);
+
+  if (producer){
+
+    const wallet = producer.wallet;
+    wallet.balance = wallet.balance += (amount*10);
+    walletRepository.update(wallet._id, wallet);
+
+  }
+  
+  return withdrawData;
+}
+
+export async function completeWithdrawal(otp: number, transfer_code: string): Promise<any> {
+
+  const completedData = finalizeTransfer(otp, transfer_code);
+  return completedData;
+
+}
+
+export async function reportIssues(comment: string, type: string, date: string, provider: Producer ){
+
+
+
+
+}
+
