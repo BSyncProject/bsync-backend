@@ -75,3 +75,23 @@ const comparePasswords = async (plainPassword: string, hashedPassword: string): 
     return false; 
   }
 };
+
+export async function makeWithdrawal(name: string, account_number: string, bank_code: string, amount: number){
+
+  const withdrawData = await startWithdrawal(name, account_number, bank_code, amount);
+  return withdrawData;
+}
+
+export async function verifyCollectorDeposit(reference: string, collector: Collector) {
+
+  const data = await verifyDeposit(reference);
+
+  if (!data.data && !(data.message == "Verification successful")){
+
+    const wallet = collector.wallet;
+    wallet.balance = wallet.balance += data.data.amount;
+    walletRepository.update(wallet._id, wallet);
+
+  }
+
+}

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postWaste = exports.login = exports.signUp = void 0;
+exports.reportIssues = exports.completeWithdrawal = exports.makeWithdrawal = exports.verifyProducerDeposit = exports.makeDeposit = exports.deleteWaste = exports.postWaste = exports.login = exports.signUp = void 0;
 const _ProducerRepository_1 = __importDefault(require("../repository/ ProducerRepository"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -85,8 +85,67 @@ function postWaste(wasteData, producer) {
             throw new Error("Unknown User");
         }
         wasteData.producer = producer;
+        wasteData.datePosted = new Date();
         const waste = yield wasteRepository.create(wasteData);
         return waste;
     });
 }
 exports.postWaste = postWaste;
+function deleteWaste(waste_id, producer) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const waste = yield wasteRepository.getById(waste_id);
+        if ((waste === null || waste === void 0 ? void 0 : waste.producer) == producer) {
+            wasteRepository.delete(waste._id);
+            return "Waste deleted successfully";
+        }
+        throw new Error("Unauthorized");
+    });
+}
+exports.deleteWaste = deleteWaste;
+function makeDeposit(amount, email) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const depositResponse = yield deposit(amount, email);
+        if (!depositResponse.data) {
+            throw new Error("An error occurred, Try again later");
+        }
+        const { createdData } = depositResponse.data;
+        return createdData;
+    });
+}
+exports.makeDeposit = makeDeposit;
+function verifyProducerDeposit(reference, producer) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const data = yield verifyDeposit(reference);
+        if (!data.data && !(data.message == "Verification successful")) {
+            const wallet = producer.wallet;
+            wallet.balance = wallet.balance += data.data.amount;
+            walletRepository.update(wallet._id, wallet);
+        }
+        return data;
+    });
+}
+exports.verifyProducerDeposit = verifyProducerDeposit;
+function makeWithdrawal(name, accountNumber, bank_code, amount, producer) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const withdrawData = yield startWithdrawal(name, accountNumber, bank_code, amount);
+        if (producer) {
+            const wallet = producer.wallet;
+            wallet.balance = wallet.balance += (amount * 10);
+            walletRepository.update(wallet._id, wallet);
+        }
+        return withdrawData;
+    });
+}
+exports.makeWithdrawal = makeWithdrawal;
+function completeWithdrawal(otp, transfer_code) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const completedData = finalizeTransfer(otp, transfer_code);
+        return completedData;
+    });
+}
+exports.completeWithdrawal = completeWithdrawal;
+function reportIssues(comment, type, date, provider) {
+    return __awaiter(this, void 0, void 0, function* () {
+    });
+}
+exports.reportIssues = reportIssues;

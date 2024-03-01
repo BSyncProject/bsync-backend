@@ -1,5 +1,14 @@
 import { Request, Response } from 'express';
-import { login, signUp } from '../services/ProducerServices';
+import { 
+  login, 
+  signUp,
+  postWaste,
+  deleteWaste,
+  makeWithdrawal,
+  makeDeposit,
+  verifyProducerDeposit,
+
+ } from '../services/ProducerServices';
 import {signToken} from '../utils/tokenUtils'
 
 import {
@@ -7,8 +16,14 @@ import {
   loginProducerValidationSchema, 
 } from '../validations/producerValidations/AuthValidations';
 
-import { postWasteValidationSchema } from '../validations/producerValidations/servicesValidationSchema';
-import { postWaste } from '../services/ProducerServices';
+import { 
+  postWasteValidationSchema,
+  withdrawalValidationSchema,
+  deleteWasteValidationSchema,
+  depositValidationSchema,
+
+} from '../validations/producerValidations/servicesValidationSchema';
+import { Producer } from '../models/Producer';
 
 const catchAsync = require('../utils/catchAsync');
 
@@ -106,17 +121,153 @@ const postPWaste = catchAsync(async(req: CustomRequest, res: Response) => {
     
   } catch(error: any) {
 
-    res.status(500).json({
+    res.status(error.status).json({
       status: 'failed',
-      message: 'An error occurred'
+      message: 'An error occurred: ' + `${error.message}`
     });
 
   }
   
 })
 
+const deleteWastes = catchAsync(async(req: CustomRequest, res: Response) => {
+
+  try{
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const {
+      waste_id,
+    } = await deleteWasteValidationSchema.validateAsync(req.body);
+
+    const waste = await deleteWaste(waste_id, producer);
+  
+    if (waste) {
+      res.status(200).json({
+        status: 'success',
+        message: waste,        
+      });
+    }
+
+  } catch (error: any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+
+})
+
+
+const withdrawMoney = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    checkProducerIsProvided(req);
+
+    const {
+      amount,
+      accountNumber,
+      bank_code,
+      name,
+    } = await withdrawalValidationSchema.validateAsync(req.body);
+
+    const response = await makeWithdrawal(name, accountNumber, bank_code, amount, req.producer);
+
+    if (!response) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "withdrawal in queue",
+      data: response,
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+const depositMoney = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const {
+      amount,
+      email,
+    } = await depositValidationSchema.validateAsync(req.body);
+
+    const response = await makeDeposit(amount, email);
+
+    if (!response) {
+      throw new Error(" An error occurred");
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: response,
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+
+
+const verifyDeposit = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const {
+      reference,
+    } = await depositValidationSchema.validateAsync(req.body);
+
+    const response = await verifyProducerDeposit(reference, producer)
+
+    if (!response) {
+      throw new Error(" An error occurred");
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: response,
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+function checkProducerIsProvided(req: CustomRequest): Producer {
+  if (!req.producer) {
+    throw new Error("User not Authorized");
+  }
+  return req.producer;
+}
+
 module.exports = {
   signUpProducer,
   loginProducer,
   postPWaste,
+  deleteWastes,
+  withdrawMoney, //See adeola at palace, ask samuel sola.
+  depositMoney,
+  verifyDeposit,
+  
 };
+
+

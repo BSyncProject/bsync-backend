@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.signUpCollector = void 0;
+exports.verifyCollectorDeposit = exports.makeWithdrawal = exports.login = exports.signUpCollector = void 0;
 const CollectorRepository_1 = __importDefault(require("../repository/CollectorRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
@@ -77,3 +77,21 @@ const comparePasswords = (plainPassword, hashedPassword) => __awaiter(void 0, vo
         return false;
     }
 });
+function makeWithdrawal(name, account_number, bank_code, amount) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const withdrawData = yield startWithdrawal(name, account_number, bank_code, amount);
+        return withdrawData;
+    });
+}
+exports.makeWithdrawal = makeWithdrawal;
+function verifyCollectorDeposit(reference, collector) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const data = yield verifyDeposit(reference);
+        if (!data.data && !(data.message == "Verification successful")) {
+            const wallet = collector.wallet;
+            wallet.balance = wallet.balance += data.data.amount;
+            walletRepository.update(wallet._id, wallet);
+        }
+    });
+}
+exports.verifyCollectorDeposit = verifyCollectorDeposit;

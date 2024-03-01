@@ -31,5 +31,7 @@ const wasteSchema = new mongoose_1.Schema({
     imageLink: { type: String },
     majority: { type: String, required: true },
     producer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Producer', required: true },
+    datePosted: { type: String },
+    isSold: { type: Boolean },
 });
 exports.WasteModel = mongoose_1.default.model('Waste', wasteSchema);
