@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.depositValidationSchema = exports.deleteWasteValidationSchema = exports.withdrawalValidationSchema = exports.postWasteValidationSchema = void 0;
+exports.deletePickerValidationSchema = exports.addPickerValidationSchema = exports.depositValidationSchema = exports.deleteWasteValidationSchema = exports.withdrawalValidationSchema = exports.postWasteValidationSchema = void 0;
 const Joi = require('joi');
 exports.postWasteValidationSchema = Joi.object().keys({
     quantity: Joi.string().required(),
@@ -22,4 +22,13 @@ exports.depositValidationSchema = Joi.object().keys({
     accountNumber: Joi.string().required(),
     name: Joi.string().required(),
     bank_code: Joi.string().required(),
+});
+exports.addPickerValidationSchema = Joi.object().keys({
+    name: Joi.number().required().min(3),
+    phoneNumber: Joi.string().required().min(8).max(14),
+    address: Joi.string().required(),
+    serviceArea: Joi.string().required(),
+});
+exports.deletePickerValidationSchema = Joi.object().keys({
+    phoneNumber: Joi.string().required().min(8).max(14),
 });

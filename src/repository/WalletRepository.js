@@ -17,6 +17,12 @@ class WalletRepository {
             return newWallet;
         });
     }
+    findOne(username) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const wallet = yield Wallet_1.WalletModel.findOne({ username: username });
+            return wallet;
+        });
+    }
     getAll() {
         return __awaiter(this, void 0, void 0, function* () {
             const allWallets = yield Wallet_1.WalletModel.find().populate('transactionHistory').populate('owner').exec();

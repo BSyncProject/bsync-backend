@@ -25,13 +25,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PickerModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-// Define Mongoose schema for Picker
 const pickerSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     address: { type: String, required: true },
     phoneNumber: { type: String, required: true },
     serviceArea: { type: String, required: true },
-    collector: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Collector', required: true }, // Assuming Collector reference
+    collector: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Collector', required: true },
 });
-// Create and export Mongoose model for Picker
 exports.PickerModel = mongoose_1.default.model('Picker', pickerSchema);

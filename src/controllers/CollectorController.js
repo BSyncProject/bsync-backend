@@ -119,10 +119,79 @@ function checkCollectorIsProvided(req) {
     }
     return req.collector;
 }
+const becomeAgentPermission = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const response = yield (0, CollectorServices_1.becomeAgent)(collector);
+        if (!response) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: response,
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const addPicker = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const { name, address, phoneNumber, serviceArea, } = yield servicesValidationSchema_1.addPickerValidationSchema.validateAsync(req.body);
+        const pickerData = {
+            name: name,
+            address: address,
+            phoneNumber: phoneNumber,
+            serviceArea: serviceArea,
+        };
+        const picker = yield (0, CollectorServices_1.addPickerr)(pickerData, collector);
+        if (!picker) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "Picker Added Successfully",
+            data: picker,
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const deletePicker = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const { phoneNumber, } = yield servicesValidationSchema_1.deletePickerValidationSchema.validateAsync(req.body);
+        const picker = yield (0, CollectorServices_1.deletePickerr)(phoneNumber, collector);
+        if (!picker) {
+            throw new Error(" An error occurred, try again");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "Picker deleted Successfully",
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
 module.exports = {
     signUp,
     loginCollector,
     collectorDeposit,
     collectorWithdrawal,
     verifyCollDeposit,
+    becomeAgentPermission,
+    addPicker,
+    deletePicker,
 };

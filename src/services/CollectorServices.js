@@ -12,12 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.completeWithdrawal = exports.makeWithdrawal = exports.verifyCollectorDeposit = exports.makeDeposit = exports.login = exports.signUpCollector = void 0;
+exports.updatePickerr = exports.deletePickerr = exports.addPickerr = exports.becomeAgent = exports.completeWithdrawal = exports.makeWithdrawal = exports.verifyCollectorDeposit = exports.makeDeposit = exports.login = exports.signUpCollector = void 0;
 const CollectorRepository_1 = __importDefault(require("../repository/CollectorRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
+const PickerServices_1 = __importDefault(require("../services/PickerServices"));
 const collectorRepository = new CollectorRepository_1.default();
 const walletRepository = new WalletRepository_1.default();
+const pickerServices = new PickerServices_1.default();
 function signUpCollector(signUpData) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!signUpData.password || !signUpData.username || !signUpData.email) {
@@ -104,8 +106,14 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, collector) {
     return __awaiter(this, void 0, void 0, function* () {
         const withdrawData = yield startWithdrawal(name, accountNumber, bank_code, amount);
         if (collector) {
-            const wallet = collector.wallet;
-            wallet.balance = wallet.balance += (amount * 10);
+            const wallet = yield walletRepository.findOne(collector.username);
+            if (!wallet) {
+                throw new Error('An error occurred');
+            }
+            if (wallet.balance < amount) {
+                throw new Error("Insufficient Fund");
+            }
+            wallet.balance = wallet.balance -= amount;
             walletRepository.update(wallet._id, wallet);
         }
         return withdrawData;
@@ -119,3 +127,65 @@ function completeWithdrawal(otp, transfer_code) {
     });
 }
 exports.completeWithdrawal = completeWithdrawal;
+function becomeAgent(collector) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!collector) {
+            throw new Error("Collector not Provided");
+        }
+        collector.isAgent = true;
+        collectorRepository.update(collector._id, collector);
+        return 'Collector is now an Agent';
+    });
+}
+exports.becomeAgent = becomeAgent;
+function addPickerr(pickerData, collector) {
+    return __awaiter(this, void 0, void 0, function* () {
+        collectIsAgent(collector);
+        pickerData.collector = collector;
+        const picker = yield pickerServices.addPicker(pickerData);
+        return picker;
+    });
+}
+exports.addPickerr = addPickerr;
+function collectIsAgent(collector) {
+    if (!collector.isAgent) {
+        throw new Error("Collector cannot Perform this action, become an agent");
+    }
+}
+function deletePickerr(pickerNumber, collector) {
+    return __awaiter(this, void 0, void 0, function* () {
+        collectIsAgent(collector);
+        const foundPicker = pickerServices.findOne(pickerNumber);
+        yield checkOwnerShip(foundPicker, collector);
+        const response = yield pickerServices.deletePicker((yield foundPicker).id);
+        return response;
+    });
+}
+exports.deletePickerr = deletePickerr;
+function updatePickerr(pickerNumber, pickerData, collector) {
+    return __awaiter(this, void 0, void 0, function* () {
+        collectIsAgent(collector);
+        const foundPicker = pickerServices.findOne(pickerNumber);
+        yield checkOwnerShip(foundPicker, collector);
+        const updatedPicker = pickerServices.updatePicker((yield foundPicker).id, pickerData);
+        return updatedPicker;
+    });
+}
+exports.updatePickerr = updatePickerr;
+function checkOwnerShip(picker, collector) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let resolvedPicker;
+        if (picker instanceof Promise) {
+            resolvedPicker = yield picker;
+        }
+        else {
+            resolvedPicker = picker;
+        }
+        if (resolvedPicker.collector === undefined) {
+            throw new Error("Collector is not defined for the picker");
+        }
+        if (resolvedPicker.collector !== collector) {
+            throw new Error("Collector is not authorized");
+        }
+    });
+}

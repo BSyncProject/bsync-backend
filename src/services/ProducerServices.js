@@ -127,10 +127,17 @@ function verifyProducerDeposit(reference, producer) {
 exports.verifyProducerDeposit = verifyProducerDeposit;
 function makeWithdrawal(name, accountNumber, bank_code, amount, producer) {
     return __awaiter(this, void 0, void 0, function* () {
-        const withdrawData = yield startWithdrawal(name, accountNumber, bank_code, amount);
+        let withdrawData;
         if (producer) {
-            const wallet = producer.wallet;
-            wallet.balance = wallet.balance += (amount * 10);
+            const wallet = yield walletRepository.findOne(producer.username);
+            if (!wallet) {
+                throw new Error('An error occurred');
+            }
+            if (wallet.balance < amount) {
+                throw new Error("Insufficient Fund");
+            }
+            withdrawData = yield startWithdrawal(name, accountNumber, bank_code, amount);
+            wallet.balance = wallet.balance -= (amount);
             walletRepository.update(wallet._id, wallet);
         }
         return withdrawData;
