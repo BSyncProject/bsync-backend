@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyCollectorDeposit = exports.makeWithdrawal = exports.login = exports.signUpCollector = void 0;
+exports.completeWithdrawal = exports.makeWithdrawal = exports.verifyCollectorDeposit = exports.makeDeposit = exports.login = exports.signUpCollector = void 0;
 const CollectorRepository_1 = __importDefault(require("../repository/CollectorRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
@@ -77,13 +77,17 @@ const comparePasswords = (plainPassword, hashedPassword) => __awaiter(void 0, vo
         return false;
     }
 });
-function makeWithdrawal(name, account_number, bank_code, amount) {
+function makeDeposit(amount, email) {
     return __awaiter(this, void 0, void 0, function* () {
-        const withdrawData = yield startWithdrawal(name, account_number, bank_code, amount);
-        return withdrawData;
+        const depositResponse = yield deposit(amount, email);
+        if (!depositResponse.data) {
+            throw new Error("An error occurred, Try again later");
+        }
+        const { createdData } = depositResponse.data;
+        return createdData;
     });
 }
-exports.makeWithdrawal = makeWithdrawal;
+exports.makeDeposit = makeDeposit;
 function verifyCollectorDeposit(reference, collector) {
     return __awaiter(this, void 0, void 0, function* () {
         const data = yield verifyDeposit(reference);
@@ -92,6 +96,26 @@ function verifyCollectorDeposit(reference, collector) {
             wallet.balance = wallet.balance += data.data.amount;
             walletRepository.update(wallet._id, wallet);
         }
+        return data;
     });
 }
 exports.verifyCollectorDeposit = verifyCollectorDeposit;
+function makeWithdrawal(name, accountNumber, bank_code, amount, collector) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const withdrawData = yield startWithdrawal(name, accountNumber, bank_code, amount);
+        if (collector) {
+            const wallet = collector.wallet;
+            wallet.balance = wallet.balance += (amount * 10);
+            walletRepository.update(wallet._id, wallet);
+        }
+        return withdrawData;
+    });
+}
+exports.makeWithdrawal = makeWithdrawal;
+function completeWithdrawal(otp, transfer_code) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const completedData = finalizeTransfer(otp, transfer_code);
+        return completedData;
+    });
+}
+exports.completeWithdrawal = completeWithdrawal;

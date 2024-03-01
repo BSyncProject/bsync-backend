@@ -6,6 +6,11 @@ class WalletRepository {
     return newWallet;
   }
 
+  async findOne(username: string): Promise<Wallet | null> {
+
+    const wallet = await WalletModel.findOne({username: username});
+    return wallet;
+  }
 
   async getAll(): Promise<Wallet[]> {
     const allWallets = await WalletModel.find().populate('transactionHistory').populate('owner').exec();

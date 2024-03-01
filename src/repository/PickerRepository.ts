@@ -24,6 +24,12 @@ class PickerRepository {
   async delete(id: string): Promise<void> {
     await PickerModel.findByIdAndDelete(id).exec();
   }
+
+  async findOne(phoneNumber: string): Promise<Picker | null>{
+    const foundCollector: Picker | null =  await PickerModel.findOne({phoneNumber: phoneNumber});
+    return foundCollector;
+  }
+
 }
 
 export default PickerRepository;

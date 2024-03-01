@@ -1,4 +1,3 @@
-import { Collector, CollectorModel } from '../models/Collector'; 
 import { Producer } from '../models/Producer';
 import { Wallet } from '../models/Wallet';
 import { Waste, WasteModel } from '../models/Waste';
@@ -136,12 +135,22 @@ export async function verifyProducerDeposit(reference: string, producer: Produce
 
 export async function makeWithdrawal(name: string, accountNumber: string, bank_code: string, amount: number, producer: Producer): Promise<any>{
 
-  const withdrawData = await startWithdrawal(name, accountNumber, bank_code, amount);
+  let withdrawData;
 
   if (producer){
+    
+    const wallet = await walletRepository.findOne(producer.username);
 
-    const wallet = producer.wallet;
-    wallet.balance = wallet.balance += (amount*10);
+    if(!wallet){
+      throw new Error('An error occurred');
+    }
+
+    if(wallet.balance < amount){
+      throw new Error("Insufficient Fund");
+    }
+
+    withdrawData = await startWithdrawal(name, accountNumber, bank_code, amount);
+    wallet.balance = wallet.balance -= (amount);
     walletRepository.update(wallet._id, wallet);
 
   }
