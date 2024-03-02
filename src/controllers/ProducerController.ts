@@ -7,6 +7,10 @@ import {
   makeWithdrawal,
   makeDeposit,
   verifyProducerDeposit,
+  getProducerWallet,
+  makePayment,
+  setWalletPin,
+  getProducer,  
 
  } from '../services/ProducerServices';
 import {signToken} from '../utils/tokenUtils'
@@ -23,10 +27,12 @@ import {
   depositValidationSchema,
   verifyDepositValidationSchema,
   finalizeWithdrawalValidationSchema,
+  setPinValidationSchema,
+  makePaymentValidationSchema,
+  searchValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Producer } from '../models/Producer';
-import { finalizeTransfer } from '../services/PaymentServices';
 
 const catchAsync = require('../utils/catchAsync');
 
@@ -172,9 +178,10 @@ const withdrawMoney = catchAsync(async (req: CustomRequest, res: Response) => {
       accountNumber,
       bank_code,
       name,
+      walletPin,
     } = await withdrawalValidationSchema.validateAsync(req.body);
 
-    const response = await makeWithdrawal(name, accountNumber, bank_code, amount, req.producer);
+    const response = await makeWithdrawal(name, accountNumber, bank_code, amount, req.producer, walletPin);
 
     console.log(response);
     if (!response) {
@@ -183,7 +190,7 @@ const withdrawMoney = catchAsync(async (req: CustomRequest, res: Response) => {
 
     res.status(200).json({
       status: 'success',
-      message: "withdrawal in queue",
+      message: "withdrawal process start, check your phone for otp",
       data: response,
     });
 
@@ -195,36 +202,36 @@ const withdrawMoney = catchAsync(async (req: CustomRequest, res: Response) => {
   }
 })
 
-const finalizeWithdrawal = catchAsync(async (req: CustomRequest, res: Response) => {
+// const finalizeWithdrawal = catchAsync(async (req: CustomRequest, res: Response) => {
 
-  try{
+//   try{
 
-    checkProducerIsProvided(req);
+//     const producer = checkProducerIsProvided(req);
 
-    const {
-      otp,
-      transfer_code,
-    } = await finalizeWithdrawalValidationSchema.validateAsync(req.body);
+//     const {
+//       otp,
+//       transfer_code,
+//     } = await finalizeWithdrawalValidationSchema.validateAsync(req.body);
 
-    const response = await finalizeTransfer(otp, transfer_code);
+//     const response = await completeWithdrawal(otp, transfer_code ,producer);
 
-    if (!response) {
-      throw new Error(" An error occurred")
-    }
+//     if (!response) {
+//       throw new Error(" An error occurred")
+//     }
 
-    res.status(200).json({
-      status: 'success',
-      message: "withdrawal in queue",
-      data: response,
-    });
+//     res.status(200).json({
+//       status: 'success',
+//       message: "withdrawal successful",
+//       data: response,
+//     });
 
-  } catch(error:any){
-    res.status(500).json({
-      status: 'failed',
-      message: 'An error occurred: ' + `${error}`,
-    })
-  }
-})
+//   } catch(error:any){
+//     res.status(500).json({
+//       status: 'failed',
+//       message: 'An error occurred: ' + `${error}`,
+//     })
+//   }
+// })
 
 const depositMoney = catchAsync(async (req: CustomRequest, res: Response) => {
 
@@ -266,9 +273,10 @@ const verifyDeposit = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const {
       reference,
+      walletPin
     } = await verifyDepositValidationSchema.validateAsync(req.body);
 
-    const response = await verifyProducerDeposit(reference, producer)
+    const response = await verifyProducerDeposit(reference, producer, walletPin)
 
     if (!response) {
       throw new Error(" An error occurred");
@@ -294,6 +302,119 @@ function checkProducerIsProvided(req: CustomRequest): Producer {
   return req.producer;
 }
 
+const getWallet = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const producer: Producer = checkProducerIsProvided(req);
+    const wallet = await getProducerWallet(producer);
+
+    res.status(200).json({
+      status: 'success',
+      message: "Wallet found",
+      data: wallet,
+    });
+
+  } catch(error:any){
+    res.status(500).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+
+const setPin = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const {
+      walletPin
+    } = setPinValidationSchema.validateAsync(req.body);
+
+    const wallet = await setWalletPin(walletPin, producer);
+
+    res.status(200).json({
+      status: 'success',
+      message: "Wallet pin set successfully",
+      data: wallet,
+    });
+
+  } catch(error:any){
+    res.status(500).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+const makePaymentP = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const {
+      receiverUsername,
+      amount,
+      walletPin,
+    } = await makePaymentValidationSchema.validateAsync(req.body);
+
+    const response = await makePayment(producer, receiverUsername, amount,walletPin);
+
+    if (!response) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Transfer Successful",
+      data: response,
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+const findProducer = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const {
+      username,
+    } = await searchValidationSchema.validateAsync(req.body);
+
+    const foundProducer = await getProducer(username);
+
+
+    if (!foundProducer) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Producer found",
+      data: foundProducer,
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+
+
 
 
 module.exports = {
@@ -304,8 +425,10 @@ module.exports = {
   withdrawMoney,
   depositMoney,
   verifyDeposit,
-  finalizeWithdrawal,
-  
+  getWallet,
+  setPin,
+  makePaymentP,
+  findProducer,  
 };
 
 

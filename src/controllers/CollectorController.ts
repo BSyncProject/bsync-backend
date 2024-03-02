@@ -1,6 +1,23 @@
 import { Request, Response } from 'express';
-import {addPickerr, becomeAgent, deletePickerr, login, makeDeposit, makeWithdrawal, signUpCollector, updatePickerr, verifyCollectorDeposit} from '../services/CollectorServices'; 
+import {
+  addPickerr, 
+  becomeAgent, 
+  deletePickerr, 
+  getCollectorWallet, 
+  login, 
+  makeDeposit, 
+  makeWithdrawal, 
+  signUpCollector, 
+  updatePickerr, 
+  verifyCollectorDeposit,
+  getWastes,
+  setWalletPin,
+  makePayment,
+  getCollector,
+
+} from '../services/CollectorServices'; 
 import {signToken} from '../utils/tokenUtils'
+
 import {
   signupValidationSchema, 
   loginValidationSchema
@@ -12,9 +29,14 @@ import {
   addPickerValidationSchema,
   deletePickerValidationSchema,
   updatePickerValidationSchema,
+  finalizeWithdrawalValidationSchema,
+  verifyDepositValidationSchema,
+  wasteAvailabilityValidationSchema,
+  setPinValidationSchema,
+  makePaymentValidationSchema,
+  searchValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
-import { Collection } from 'mongoose';
 import { Collector } from '../models/Collector';
 import { Picker } from '../models/Picker';
 
@@ -85,6 +107,7 @@ interface CustomRequest extends Request {
   collector?: Collector,
 }
 
+
 const collectorWithdrawal = catchAsync(async (req: CustomRequest, res: Response) => {
 
   try{
@@ -96,9 +119,10 @@ const collectorWithdrawal = catchAsync(async (req: CustomRequest, res: Response)
       accountNumber,
       bank_code,
       name,
+      walletPin,
     } = await withdrawalValidationSchema.validateAsync(req.body);
 
-    const response = await makeWithdrawal(name, accountNumber, bank_code, amount, collector);
+    const response = await makeWithdrawal(name, accountNumber, bank_code, amount, collector, walletPin);
 
     if (!response) {
       throw new Error(" An error occurred")
@@ -106,7 +130,7 @@ const collectorWithdrawal = catchAsync(async (req: CustomRequest, res: Response)
 
     res.status(200).json({
       status: 'success',
-      message: "withdrawal in queue",
+      message: "withdrawal process start, check your phone for otp",
       data: response,
     });
 
@@ -117,6 +141,7 @@ const collectorWithdrawal = catchAsync(async (req: CustomRequest, res: Response)
     })
   }
 })
+
 
 const collectorDeposit = catchAsync(async (req: CustomRequest, res: Response) => {
 
@@ -158,9 +183,10 @@ const verifyCollDeposit = catchAsync(async (req: CustomRequest, res: Response) =
 
     const {
       reference,
-    } = await depositValidationSchema.validateAsync(req.body);
+      walletPin
+    } = await verifyDepositValidationSchema.validateAsync(req.body);
 
-    const response = await verifyCollectorDeposit(reference, collector)
+    const response = await verifyCollectorDeposit(reference, collector, walletPin)
 
     if (!response) {
       throw new Error(" An error occurred");
@@ -179,6 +205,36 @@ const verifyCollDeposit = catchAsync(async (req: CustomRequest, res: Response) =
   }
 })
 
+const setPin = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const collector: Collector = checkCollectorIsProvided(req);
+
+    const {
+      walletPin,
+    } = await setPinValidationSchema.validateAsync(req.body);
+
+    const response = await setWalletPin(walletPin, collector);
+
+    if (!response) {
+      throw new Error("An Error occurred");
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Pin set successfully",
+      data: response,
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
 function checkCollectorIsProvided(req: CustomRequest): Collector{
   if(!req.collector){
     throw new Error("No authorized user provided");
@@ -186,6 +242,7 @@ function checkCollectorIsProvided(req: CustomRequest): Collector{
 
   return req.collector
 }
+
 
 
 const becomeAgentPermission = catchAsync(async (req: CustomRequest, res: Response) => {
@@ -213,7 +270,6 @@ const becomeAgentPermission = catchAsync(async (req: CustomRequest, res: Respons
   }
 })
  
-
 
 const addPicker = catchAsync(async (req: CustomRequest, res: Response) => {
 
@@ -320,6 +376,117 @@ const updatePicker = catchAsync(async(req: CustomRequest, res: Response) => {
   }
 })
 
+const getWallet = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const collector: Collector = checkCollectorIsProvided(req);
+
+    const wallet = await getCollectorWallet(collector);
+
+    res.status(200).json({
+      status: 'success',
+      message: "wallet found",
+      data: wallet,
+    });
+
+  } catch(error:any){
+    res.status(500).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+
+const getAvailableWaste = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+    
+    const collector: Collector = checkCollectorIsProvided(req);
+    
+    const { location } = await wasteAvailabilityValidationSchema.validateAsync(req.params.location);
+
+    const listOfAvailableWastes = await getWastes(location);
+
+    res.status(200).json({
+      status: 'success',
+      message: "all waste found",
+      data: listOfAvailableWastes,
+    });
+
+  } catch(error:any){
+    res.status(500).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+const makePaymentC = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const collector: Collector = checkCollectorIsProvided(req);
+
+    const {
+      receiverUsername,
+      amount,
+      walletPin,
+    } = await makePaymentValidationSchema.validateAsync(req.body);
+
+    const response = await makePayment(collector, receiverUsername, amount,walletPin);
+
+    if (!response) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Transfer Successful",
+      data: response,
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+const findCollector = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const collector: Collector = checkCollectorIsProvided(req);
+
+    const {
+      username,
+    } = await searchValidationSchema.validateAsync(req.body);
+
+    const foundCollector = await getCollector(username);
+
+
+    if (!foundCollector) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Producer found",
+      data: foundCollector,
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+
 
 module.exports = {
   signUp,
@@ -331,6 +498,9 @@ module.exports = {
   addPicker,
   deletePicker,
   updatePicker,
-
-
+  getWallet,
+  getAvailableWaste,
+  setPin,
+  makePaymentC,
+  findCollector,
 }

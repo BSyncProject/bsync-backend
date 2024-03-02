@@ -13,6 +13,7 @@ export const withdrawalValidationSchema = Joi.object().keys({
   accountNumber: Joi.string().required(),
   name: Joi.string().required(),
   bank_code: Joi.string().required(),
+  walletPin: Joi.string().required(),
 });
 
 export const deleteWasteValidationSchema = Joi.object().keys({
@@ -26,6 +27,7 @@ export const depositValidationSchema = Joi.object().keys({
 
 export const verifyDepositValidationSchema = Joi.object().keys({
   reference: Joi.string().required(),
+  walletPin: Joi.string().required()
 });
 
 
@@ -48,4 +50,25 @@ export const updatePickerValidationSchema = Joi.object().keys({
 export const finalizeWithdrawalValidationSchema = Joi.object().keys({
   otp: Joi.string().required(),
   transfer_code: Joi.string().required()
+})
+
+
+export const wasteAvailabilityValidationSchema = Joi.object().keys({
+  location: Joi.string().required(),
+})
+
+export const setPinValidationSchema = Joi.object().keys({
+  walletPin: Joi.string().required().min(4).max(4),
+})
+
+
+export const makePaymentValidationSchema = Joi.object().keys({
+  receiverUsername: Joi.string().required(),
+  walletPin: Joi.string().required().min(4).max(4),
+  amount: Joi.string().required(),
+})
+
+
+export const searchValidationSchema = Joi.object().keys({
+  username: Joi.string().required(),
 })

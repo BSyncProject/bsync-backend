@@ -55,14 +55,14 @@ const loginCollector = catchAsync((req, res) => __awaiter(void 0, void 0, void 0
 const collectorWithdrawal = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const collector = checkCollectorIsProvided(req);
-        const { amount, accountNumber, bank_code, name, } = yield servicesValidationSchema_1.withdrawalValidationSchema.validateAsync(req.body);
-        const response = yield (0, CollectorServices_1.makeWithdrawal)(name, accountNumber, bank_code, amount, collector);
+        const { amount, accountNumber, bank_code, name, walletPin, } = yield servicesValidationSchema_1.withdrawalValidationSchema.validateAsync(req.body);
+        const response = yield (0, CollectorServices_1.makeWithdrawal)(name, accountNumber, bank_code, amount, collector, walletPin);
         if (!response) {
             throw new Error(" An error occurred");
         }
         res.status(200).json({
             status: 'success',
-            message: "withdrawal in queue",
+            message: "withdrawal process start, check your phone for otp",
             data: response,
         });
     }
@@ -96,14 +96,35 @@ const collectorDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, void
 const verifyCollDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const collector = checkCollectorIsProvided(req);
-        const { reference, } = yield servicesValidationSchema_1.depositValidationSchema.validateAsync(req.body);
-        const response = yield (0, CollectorServices_1.verifyCollectorDeposit)(reference, collector);
+        const { reference, walletPin } = yield servicesValidationSchema_1.verifyDepositValidationSchema.validateAsync(req.body);
+        const response = yield (0, CollectorServices_1.verifyCollectorDeposit)(reference, collector, walletPin);
         if (!response) {
             throw new Error(" An error occurred");
         }
         res.status(200).json({
             status: 'success',
             message: response,
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const setPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const { walletPin, } = yield servicesValidationSchema_1.setPinValidationSchema.validateAsync(req.body);
+        const response = yield (0, CollectorServices_1.setWalletPin)(walletPin, collector);
+        if (!response) {
+            throw new Error("An Error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "Pin set successfully",
+            data: response,
         });
     }
     catch (error) {
@@ -212,6 +233,83 @@ const updatePicker = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
         });
     }
 }));
+const getWallet = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const wallet = yield (0, CollectorServices_1.getCollectorWallet)(collector);
+        res.status(200).json({
+            status: 'success',
+            message: "wallet found",
+            data: wallet,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const getAvailableWaste = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const { location } = yield servicesValidationSchema_1.wasteAvailabilityValidationSchema.validateAsync(req.params.location);
+        const listOfAvailableWastes = yield (0, CollectorServices_1.getWastes)(location);
+        res.status(200).json({
+            status: 'success',
+            message: "all waste found",
+            data: listOfAvailableWastes,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const makePaymentC = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const { receiverUsername, amount, walletPin, } = yield servicesValidationSchema_1.makePaymentValidationSchema.validateAsync(req.body);
+        const response = yield (0, CollectorServices_1.makePayment)(collector, receiverUsername, amount, walletPin);
+        if (!response) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "Transfer Successful",
+            data: response,
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const findCollector = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const { username, } = yield servicesValidationSchema_1.searchValidationSchema.validateAsync(req.body);
+        const foundCollector = yield (0, CollectorServices_1.getCollector)(username);
+        if (!foundCollector) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "Producer found",
+            data: foundCollector,
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
 module.exports = {
     signUp,
     loginCollector,
@@ -222,4 +320,9 @@ module.exports = {
     addPicker,
     deletePicker,
     updatePicker,
+    getWallet,
+    getAvailableWaste,
+    setPin,
+    makePaymentC,
+    findCollector,
 };

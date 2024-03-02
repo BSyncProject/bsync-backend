@@ -10,12 +10,11 @@ import {
   deposit, 
   verifyDeposit, 
   startWithdrawal, 
-  finalizeTransfer,
   makeTransfer
 } from './PaymentServices';
 import { Transaction } from '../models/Transaction';
-
-
+import { Collector } from '../models/Collector';
+import { getCollector } from './CollectorServices';
 
 
 const producerRepository = new ProducerRepository();
@@ -36,7 +35,7 @@ export async function signUp(signUpData: Partial<Producer>): Promise<Producer> {
     throw new Error('Username is already taken');
   }
 
-  signUpData.password = await encodePassword(signUpData.password);
+  signUpData.password = await encode(signUpData.password);
   signUpData.wallet = await createNewWallet(signUpData.username)
 
   const newProducer = await producerRepository.create(signUpData);
@@ -54,7 +53,7 @@ async function createNewWallet(username: string): Promise<Wallet> {
 
 }
 
-async function encodePassword(password: string) {
+async function encode(password: string) {
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
   return hashedPassword;
@@ -72,7 +71,7 @@ export async function login(loginData: Partial<Producer>): Promise<Producer> {
     throw new Error("User Not found");
   }
 
-  const passwordsMatch = await comparePasswords(loginData.password, foundProducer.password);
+  const passwordsMatch = await compare(loginData.password, foundProducer.password);
 
   if(!passwordsMatch){
     throw new Error("Incorrect Password");
@@ -82,11 +81,11 @@ export async function login(loginData: Partial<Producer>): Promise<Producer> {
 
 }
 
-const comparePasswords = async (plainPassword: string, hashedPassword: string): Promise<boolean> => {
+const compare = async (plainPassword: string, hashedPassword: string): Promise<boolean> => {
   try {
     return await bcrypt.compare(plainPassword, hashedPassword);
   } catch (error) {
-    console.error('Error comparing passwords:', error);
+    console.error('Error comparing:', error);
     return false; 
   }
 };
@@ -129,18 +128,20 @@ export async function makeDeposit(amount: number, email: string): Promise<any>{
 
 }
 
-export async function verifyProducerDeposit(reference: string, producer: Producer): Promise<any> {
+export async function verifyProducerDeposit(reference: string, producer: Producer, walletPin: string): Promise<any> {
 
   const data = await verifyDeposit(reference);
 
   if (!data.data || !(data.message == "Verification successful")){
     throw new Error("Verification not successful");
   }
+
   const wallet = await walletRepository.findOne(producer.username);
   if(!wallet){
     throw new Error("Wallet not Found");
   }
 
+  checkWalletPin(walletPin, wallet.pin);
   checkTransactionReference(reference);
   
   const transaction = createTransaction(producer.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
@@ -149,6 +150,12 @@ export async function verifyProducerDeposit(reference: string, producer: Produce
   walletRepository.update(wallet._id, wallet);
 
   return data;
+}
+
+function checkWalletPin(walletPin: string, hashedPin: string) {
+  if (!(compare(walletPin, hashedPin))) {
+    throw new Error("Wallet Pin incorrect");
+  }
 }
 
 const checkTransactionReference = async(reference: string): Promise<void> => {
@@ -175,64 +182,112 @@ function createTransaction(sender: string, receiver: string, reference: string, 
   return transaction;
 }
 
-export async function makeWithdrawal(name: string, accountNumber: string, bank_code: string, amount: number, producer: Producer): Promise<any>{
+export async function makeWithdrawal(name: string, accountNumber: string, bank_code: string, amount: number, producer: Producer, walletPin: string): Promise<any>{
 
   try{
-    let withdrawData;
 
-    if (producer){
-      const wallet = await walletRepository.findOne(producer.username);
-
-      if(!wallet){
-        throw new Error('Producer does not have a wallet');
-      }
-
-      if(wallet.balance < amount){
-        throw new Error("Insufficient Balance");
-      }
-      const data = await startWithdrawal(name, accountNumber, bank_code, amount);
-      
-      withdrawData = await makeTransfer(amount, data.recipient_code);
-
+    if (!producer){
+      throw new Error("Producer is not provided")
     }
-  
+
+    const wallet = await walletRepository.findOne(producer.username);
+
+    if(!wallet){
+      throw new Error('Producer does not have a wallet');
+    }
+    checkWalletPin(walletPin, wallet.pin);
+
+    if(wallet.balance < amount){
+      throw new Error("Insufficient Balance");
+    }
+    const data = await startWithdrawal(name, accountNumber, bank_code, amount);
+    
+    const withdrawData = await makeTransfer(amount, data.recipient_code);
+
+    checkTransactionReference(withdrawData.data.reference);
+
+    const transaction = createTransaction("Bsync",producer.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount, withdrawData.data.create_at);
+
+    wallet.balance = wallet.balance - withdrawData.data.amount;
+    wallet.transactionHistory.push((await transaction));
+    walletRepository.update(wallet._id, wallet);
+
+
     return withdrawData;
+
   } catch(error: any){
     throw new Error(`${error}`);
   }
   
 }
 
-export async function completeWithdrawal(otp: number, transfer_code: string, producer: Producer): Promise<any> {
+export async function setWalletPin(walletPin: string, producer: Producer): Promise<Wallet>{
 
-  const completedData = await finalizeTransfer(otp, transfer_code);
-
-  if(!completedData){
-    throw new Error("An Error occurred")
-  }
-
-  const wallet = await walletRepository.findOne(producer.username);
-  
-  if(!wallet){
-    throw new Error('An error occurred');
-  }
-
-  checkTransactionReference(completedData.data.reference);
-  
-  const transaction = createTransaction("Bsync",producer.username, completedData.data.reference, "Withdrawal", completedData.data.amount, completedData.data.create_at);
-
-  wallet.balance = wallet.balance - completedData.data.amount;
-  wallet.transactionHistory.push((await transaction));
+  const wallet = await getWallet(producer.username);
+  wallet.pin = await encode(walletPin);
   walletRepository.update(wallet._id, wallet);
+  return wallet;
+}
 
-  return completedData;
+export async function makePayment(producer: Producer, collectorUsername: string, amount: number, walletPin: string): Promise<any>{
+
+
+  const collector: Collector = await getCollector(collectorUsername);
+  const senderWallet = await walletRepository.findOne(producer.username);
+  const receiverWallet = await walletRepository.findOne(collector.username);
+
+  if (!senderWallet || !receiverWallet ){
+    throw new Error('Wallet not found')
+  }
+
+  checkWalletPin(walletPin, senderWallet.pin);
+  
+  if(senderWallet.balance < amount){
+    throw new Error('Insufficient Balance');
+  }
+
+  senderWallet.balance = senderWallet.balance - amount;
+  receiverWallet.balance = receiverWallet.balance + amount; 
+
+  const senderTransaction = await createTransaction(collector.username, producer.username, `${Date.now()}`, "Debit", amount, String(Date.now()));
+  senderWallet.transactionHistory.push(senderTransaction);
+
+  const receiverTransaction = await createTransaction(collector.username, producer.username, `${Date.now()}`, "Credit", amount, String(Date.now()));
+  receiverWallet.transactionHistory.push(receiverTransaction);
+
+  walletRepository.update(senderWallet._id, senderWallet);
+  walletRepository.update(receiverWallet._id, receiverWallet);
+  return "Successful"
 
 }
+
 
 export async function reportIssues(comment: string, type: string, date: string, provider: Producer ){
 
 
 
+
+}
+
+export async function getProducerWallet(producer: Producer): Promise<Wallet>{
+
+  const wallet = await walletRepository.findOne(producer.username);
+
+   if(!wallet){
+    throw new Error("Wallet Not Found");
+   }
+
+   return wallet;
+  
+}
+
+export async function getProducer(username: string): Promise<Producer> {
+
+  const producer = await producerRepository.findOne(username);
+  if(!producer){
+    throw new Error("Producer not found");
+  }
+  return producer;
 
 }
 
