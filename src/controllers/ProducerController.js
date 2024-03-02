@@ -13,6 +13,7 @@ const ProducerServices_1 = require("../services/ProducerServices");
 const tokenUtils_1 = require("../utils/tokenUtils");
 const AuthValidations_1 = require("../validations/producerValidations/AuthValidations");
 const servicesValidationSchema_1 = require("../validations/producerValidations/servicesValidationSchema");
+const PaymentServices_1 = require("../services/PaymentServices");
 const catchAsync = require('../utils/catchAsync');
 const signUpProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -67,7 +68,7 @@ const postPWaste = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fu
         }
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error.message}`
         });
@@ -86,7 +87,7 @@ const deleteWastes = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
         }
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(400).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -97,6 +98,7 @@ const withdrawMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
         checkProducerIsProvided(req);
         const { amount, accountNumber, bank_code, name, } = yield servicesValidationSchema_1.withdrawalValidationSchema.validateAsync(req.body);
         const response = yield (0, ProducerServices_1.makeWithdrawal)(name, accountNumber, bank_code, amount, req.producer);
+        console.log(response);
         if (!response) {
             throw new Error(" An error occurred");
         }
@@ -107,7 +109,28 @@ const withdrawMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const finalizeWithdrawal = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        checkProducerIsProvided(req);
+        const { otp, transfer_code, } = yield servicesValidationSchema_1.finalizeWithdrawalValidationSchema.validateAsync(req.body);
+        const response = yield (0, PaymentServices_1.finalizeTransfer)(otp, transfer_code);
+        if (!response) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "withdrawal in queue",
+            data: response,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -127,7 +150,7 @@ const depositMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -136,7 +159,7 @@ const depositMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
 const verifyDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const producer = checkProducerIsProvided(req);
-        const { reference, } = yield servicesValidationSchema_1.depositValidationSchema.validateAsync(req.body);
+        const { reference, } = yield servicesValidationSchema_1.verifyDepositValidationSchema.validateAsync(req.body);
         const response = yield (0, ProducerServices_1.verifyProducerDeposit)(reference, producer);
         if (!response) {
             throw new Error(" An error occurred");
@@ -147,7 +170,7 @@ const verifyDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -164,7 +187,8 @@ module.exports = {
     loginProducer,
     postPWaste,
     deleteWastes,
-    withdrawMoney, //See adeola at palace, ask samuel sola.
+    withdrawMoney,
     depositMoney,
     verifyDeposit,
+    finalizeWithdrawal,
 };

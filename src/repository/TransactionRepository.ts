@@ -8,6 +8,11 @@ class TransactionRepository {
     return newTransaction;
   }
 
+  async findOne(reference: string): Promise<Transaction  | null>{
+    const transaction =  await TransactionModel.findOne({reference: reference});
+    return transaction
+  }
+
   async getAll(): Promise<Transaction[]> {
     const allTransactions = await TransactionModel.find().exec();
     return allTransactions;

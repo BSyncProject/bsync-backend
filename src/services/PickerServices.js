@@ -8,43 +8,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const Picker_1 = require("../models/Picker"); // Assuming Picker model is defined
-class PickerRepository {
-    create(pickerData) {
+const PickerRepository_1 = __importDefault(require("../repository/PickerRepository"));
+const pickerRepository = new PickerRepository_1.default();
+class PickerServices {
+    addPicker(pickerData) {
         return __awaiter(this, void 0, void 0, function* () {
-            const newPicker = yield Picker_1.PickerModel.create(pickerData);
-            return newPicker;
-        });
-    }
-    getAll() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const allPickers = yield Picker_1.PickerModel.find().populate('collector').exec();
-            return allPickers;
-        });
-    }
-    getById(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const picker = yield Picker_1.PickerModel.findById(id).populate('collector').exec();
+            const picker = yield pickerRepository.create(pickerData);
             return picker;
         });
     }
-    update(id, pickerData) {
+    deletePicker(picker_id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const updatedPicker = yield Picker_1.PickerModel.findByIdAndUpdate(id, pickerData, { new: true }).exec();
-            return updatedPicker;
+            yield pickerRepository.delete(picker_id);
+            return 'picker deleted successfully';
         });
     }
-    delete(id) {
+    updatePicker(picker_id, pickerData) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield Picker_1.PickerModel.findByIdAndDelete(id).exec();
+            const picker = yield pickerRepository.update(picker_id, pickerData);
+            return picker;
         });
     }
     findOne(phoneNumber) {
         return __awaiter(this, void 0, void 0, function* () {
-            const foundCollector = yield Picker_1.PickerModel.findOne({ phoneNumber: phoneNumber });
-            return foundCollector;
+            const foundPicker = yield pickerRepository.findOne(phoneNumber);
+            if (foundPicker == null) {
+                throw new Error(`picker with phoneNumber ${phoneNumber} not found`);
+            }
+            return foundPicker;
         });
     }
 }
-exports.default = PickerRepository;
+exports.default = PickerServices;

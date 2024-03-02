@@ -17,9 +17,12 @@ const _ProducerRepository_1 = __importDefault(require("../repository/ ProducerRe
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const WasteRepository_1 = __importDefault(require("../repository/WasteRepository"));
+const TransactionRepository_1 = __importDefault(require("../repository/TransactionRepository"));
+const PaymentServices_1 = require("./PaymentServices");
 const producerRepository = new _ProducerRepository_1.default();
 const walletRepository = new WalletRepository_1.default();
 const wasteRepository = new WasteRepository_1.default();
+const transactionRepository = new TransactionRepository_1.default();
 function signUp(signUpData) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!signUpData.password || !signUpData.username || !signUpData.email) {
@@ -104,42 +107,90 @@ function deleteWaste(waste_id, producer) {
 exports.deleteWaste = deleteWaste;
 function makeDeposit(amount, email) {
     return __awaiter(this, void 0, void 0, function* () {
-        const depositResponse = yield deposit(amount, email);
+        const depositResponse = yield (0, PaymentServices_1.deposit)(amount, email);
         if (!depositResponse.data) {
-            throw new Error("An error occurred, Try again later");
+            throw new Error("An error occurred, Try again");
         }
-        const { createdData } = depositResponse.data;
-        return createdData;
+        return depositResponse.data;
     });
 }
 exports.makeDeposit = makeDeposit;
 function verifyProducerDeposit(reference, producer) {
     return __awaiter(this, void 0, void 0, function* () {
-        const data = yield verifyDeposit(reference);
-        if (!data.data && !(data.message == "Verification successful")) {
-            const wallet = producer.wallet;
-            wallet.balance = wallet.balance += data.data.amount;
-            walletRepository.update(wallet._id, wallet);
+        const data = yield (0, PaymentServices_1.verifyDeposit)(reference);
+        if (!data.data || !(data.message == "Verification successful")) {
+            throw new Error("Verification not successful");
         }
+        const wallet = yield walletRepository.findOne(producer.username);
+        if (!wallet) {
+            throw new Error("Wallet not Found");
+        }
+        checkTransactionReference(reference);
+        const transaction = createTransaction(producer.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
+        wallet.balance = wallet.balance + data.data.amount;
+        wallet.transactionHistory.push((yield transaction));
+        walletRepository.update(wallet._id, wallet);
         return data;
     });
 }
 exports.verifyProducerDeposit = verifyProducerDeposit;
+const checkTransactionReference = (reference) => __awaiter(void 0, void 0, void 0, function* () {
+    const transaction = yield transactionRepository.findOne(reference);
+    if (transaction) {
+        throw new Error("Transaction Already Verified");
+    }
+});
+function createTransaction(sender, receiver, reference, type, amount, date) {
+    const transactionData = {
+        sender: sender,
+        type: type,
+        receiver: receiver,
+        amount: amount,
+        reference: reference,
+        comment: type,
+        date: date,
+    };
+    const transaction = transactionRepository.create(transactionData);
+    return transaction;
+}
 function makeWithdrawal(name, accountNumber, bank_code, amount, producer) {
     return __awaiter(this, void 0, void 0, function* () {
-        const withdrawData = yield startWithdrawal(name, accountNumber, bank_code, amount);
-        if (producer) {
-            const wallet = producer.wallet;
-            wallet.balance = wallet.balance += (amount * 10);
-            walletRepository.update(wallet._id, wallet);
+        try {
+            let withdrawData;
+            if (producer) {
+                const wallet = yield walletRepository.findOne(producer.username);
+                if (!wallet) {
+                    throw new Error('Producer does not have a wallet');
+                }
+                if (wallet.balance < amount) {
+                    throw new Error("Insufficient Balance");
+                }
+                const data = yield (0, PaymentServices_1.startWithdrawal)(name, accountNumber, bank_code, amount);
+                withdrawData = yield (0, PaymentServices_1.makeTransfer)(amount, data.recipient_code);
+            }
+            return withdrawData;
         }
-        return withdrawData;
+        catch (error) {
+            throw new Error(`${error}`);
+        }
     });
 }
 exports.makeWithdrawal = makeWithdrawal;
-function completeWithdrawal(otp, transfer_code) {
+function completeWithdrawal(otp, transfer_code, producer) {
     return __awaiter(this, void 0, void 0, function* () {
-        const completedData = finalizeTransfer(otp, transfer_code);
+        const completedData = yield (0, PaymentServices_1.finalizeTransfer)(otp, transfer_code);
+        if (!completedData) {
+            throw new Error("An Error occurred");
+        }
+        const wallet = yield walletRepository.findOne(producer.username);
+        if (!wallet) {
+            throw new Error('An error occurred');
+        }
+        checkTransactionReference(completedData.data.reference);
+        const transaction = createTransaction("Bsync", producer.username, completedData.data.reference, "Withdrawal", completedData.data.amount, completedData.data.create_at);
+        wallet.balance = wallet.balance - completedData.data.amount;
+        wallet.transactionHistory.push((yield transaction));
+        walletRepository.update(wallet._id, wallet);
         return completedData;
     });
 }

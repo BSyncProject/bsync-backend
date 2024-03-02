@@ -21,9 +21,12 @@ import {
   withdrawalValidationSchema,
   deleteWasteValidationSchema,
   depositValidationSchema,
+  verifyDepositValidationSchema,
+  finalizeWithdrawalValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Producer } from '../models/Producer';
+import { finalizeTransfer } from '../services/PaymentServices';
 
 const catchAsync = require('../utils/catchAsync');
 
@@ -121,7 +124,7 @@ const postPWaste = catchAsync(async(req: CustomRequest, res: Response) => {
     
   } catch(error: any) {
 
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error.message}`
     });
@@ -149,7 +152,7 @@ const deleteWastes = catchAsync(async(req: CustomRequest, res: Response) => {
     }
 
   } catch (error: any){
-    res.status(error.status).json({
+    res.status(400).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -173,6 +176,7 @@ const withdrawMoney = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const response = await makeWithdrawal(name, accountNumber, bank_code, amount, req.producer);
 
+    console.log(response);
     if (!response) {
       throw new Error(" An error occurred")
     }
@@ -184,7 +188,38 @@ const withdrawMoney = catchAsync(async (req: CustomRequest, res: Response) => {
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+const finalizeWithdrawal = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    checkProducerIsProvided(req);
+
+    const {
+      otp,
+      transfer_code,
+    } = await finalizeWithdrawalValidationSchema.validateAsync(req.body);
+
+    const response = await finalizeTransfer(otp, transfer_code);
+
+    if (!response) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "withdrawal in queue",
+      data: response,
+    });
+
+  } catch(error:any){
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -214,7 +249,7 @@ const depositMoney = catchAsync(async (req: CustomRequest, res: Response) => {
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -231,7 +266,7 @@ const verifyDeposit = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const {
       reference,
-    } = await depositValidationSchema.validateAsync(req.body);
+    } = await verifyDepositValidationSchema.validateAsync(req.body);
 
     const response = await verifyProducerDeposit(reference, producer)
 
@@ -245,7 +280,7 @@ const verifyDeposit = catchAsync(async (req: CustomRequest, res: Response) => {
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -259,14 +294,17 @@ function checkProducerIsProvided(req: CustomRequest): Producer {
   return req.producer;
 }
 
+
+
 module.exports = {
   signUpProducer,
   loginProducer,
   postPWaste,
   deleteWastes,
-  withdrawMoney, //See adeola at palace, ask samuel sola.
+  withdrawMoney,
   depositMoney,
   verifyDeposit,
+  finalizeWithdrawal,
   
 };
 

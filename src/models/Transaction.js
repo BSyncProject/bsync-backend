@@ -26,11 +26,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransactionModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const transactionSchema = new mongoose_1.Schema({
-    sender: { type: Number, required: true },
+    type: { type: String, required: true },
+    sender: { type: String, required: true },
     receiver: { type: String, required: true },
-    date: { type: Date, required: true },
+    date: { type: String, required: true },
     amount: { type: String, required: true },
     comment: { type: String, required: true },
-    detail: { type: String, required: true },
+    reference: { type: String, required: true },
 });
 exports.TransactionModel = mongoose_1.default.model('Transaction', transactionSchema);

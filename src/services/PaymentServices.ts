@@ -1,11 +1,11 @@
 
 
 
-const deposit = async(amount:number,  email: string) => {
+export const deposit = async(amount:number,  email: string) => {
 
     const requestData = {
       email: email,
-      amount: (amount * 10),
+      amount: amount,
     };
 
     const requestOptions = {
@@ -31,7 +31,7 @@ const deposit = async(amount:number,  email: string) => {
 }
 
 
-const verifyDeposit = async (reference: string) => {
+export const verifyDeposit = async (reference: string) => {
 
   const url = `${process.env.VERIFY_URL}/${reference}`;
 
@@ -60,56 +60,59 @@ const verifyDeposit = async (reference: string) => {
 }
 
 
-const startWithdrawal = async (name: string, account_number: string, bank_code: string, amount: number) => {
+export const startWithdrawal = async (name: string, account_number: string, bank_code: string, amount: number) => {
 
-  const url = process.env.RECIPIENT_CREATE_URL || "create url";
+  try{
+    const url = process.env.RECIPIENT_CREATE_URL || "create url";
 
-  const requestData = JSON.stringify({
-    type: "nuban",
-    name: name,
-    account_number: account_number,
-    bank_code: bank_code,
-    currency: "NGN"
-  });
+    const requestData = JSON.stringify({
+      type: "nuban",
+      name: name,
+      account_number: account_number,
+      bank_code: bank_code,
+      currency: "NGN"
+    });
 
-  await fetch(url, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${process.env.PAYMENT_SECRET_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: requestData
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    return response.json();
-  })
-  .then(dataObject => {
-    const {data} = dataObject;
-    const response = makeTransfer(amount, data.recipient_code);
-    return response;
-  })
-  .catch(error => {
+    const responseData = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.PAYMENT_SECRET_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: requestData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.json()}`);
+      }
+      return response.json();
+    })
+    .then(dataObject => {
+      const {data} = dataObject;
+      return data;
+    })
+
+    return responseData;
+
+  } catch(error) {
     return error;
-  });
+  }
 
 }
 
 
-const makeTransfer  = (amount: number, recipient_code: string) => {
+export const makeTransfer  = async (amount: number, recipient_code: string) => {
 
   const url = process.env.TRANSFER_URL || "transfer to recipient";
 
   const requestData = JSON.stringify({
     source: "balance",
     reason: "Bsync Withdrawal Payment",
-    amount: (amount * 10),
-    recipient: recipient_code
+    amount: amount,
+    recipient: recipient_code,
   });
 
-  fetch(url, {
+  const response: any = await fetch(url, {
     method: 'POST',
     headers: {
       "Authorization": `Bearer ${process.env.PAYMENT_SECRET_KEY}`,
@@ -119,21 +122,16 @@ const makeTransfer  = (amount: number, recipient_code: string) => {
   })
   .then(response => {
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      throw new Error(`${response.json()}`);
     }
     return response.json();
   })
-  .then(data => {
-    return data;
-  })
-  .catch(error => {
-    return error;
-  });
 
+  return response;
 
 }
 
-const finalizeTransfer = (otp: number, transfer_code: string) => {
+export const finalizeTransfer = async (otp: number, transfer_code: string) => {
 
   const url = process.env.FINAL_PAYMENT || 'make transfer';
 
@@ -144,7 +142,7 @@ const finalizeTransfer = (otp: number, transfer_code: string) => {
 
   try{
 
-    fetch(url, {
+    const responseData = await fetch(url, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.PAYMENT_SECRET_KEY}`,
@@ -155,25 +153,17 @@ const finalizeTransfer = (otp: number, transfer_code: string) => {
   
     .then(response => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`${response.json()}`);
       }
       return response.json();
     })
-    .then(data => {
-      return data
-    })
     
-
+    return responseData;
+    
   } catch(error) {
-    throw new Error('Error' + `${error}`);
+    return`${error}`;
   }
 
 }
 
 
-module.exports = {
-  deposit,
-  verifyDeposit,
-  startWithdrawal,
-  finalizeTransfer,
-}
