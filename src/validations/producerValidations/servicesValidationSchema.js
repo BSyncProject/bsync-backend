@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.finalizeWithdrawalValidationSchema = exports.updatePickerValidationSchema = exports.deletePickerValidationSchema = exports.addPickerValidationSchema = exports.verifyDepositValidationSchema = exports.depositValidationSchema = exports.deleteWasteValidationSchema = exports.withdrawalValidationSchema = exports.postWasteValidationSchema = void 0;
+exports.searchValidationSchema = exports.makePaymentValidationSchema = exports.setPinValidationSchema = exports.wasteAvailabilityValidationSchema = exports.finalizeWithdrawalValidationSchema = exports.updatePickerValidationSchema = exports.deletePickerValidationSchema = exports.addPickerValidationSchema = exports.verifyDepositValidationSchema = exports.depositValidationSchema = exports.deleteWasteValidationSchema = exports.withdrawalValidationSchema = exports.postWasteValidationSchema = void 0;
 const Joi = require('joi');
 exports.postWasteValidationSchema = Joi.object().keys({
     quantity: Joi.string().required(),
@@ -13,6 +13,7 @@ exports.withdrawalValidationSchema = Joi.object().keys({
     accountNumber: Joi.string().required(),
     name: Joi.string().required(),
     bank_code: Joi.string().required(),
+    walletPin: Joi.string().required(),
 });
 exports.deleteWasteValidationSchema = Joi.object().keys({
     waste_id: Joi.string().required(),
@@ -23,6 +24,7 @@ exports.depositValidationSchema = Joi.object().keys({
 });
 exports.verifyDepositValidationSchema = Joi.object().keys({
     reference: Joi.string().required(),
+    walletPin: Joi.string().required()
 });
 exports.addPickerValidationSchema = Joi.object().keys({
     name: Joi.number().required().min(3),
@@ -40,4 +42,18 @@ exports.updatePickerValidationSchema = Joi.object().keys({
 exports.finalizeWithdrawalValidationSchema = Joi.object().keys({
     otp: Joi.string().required(),
     transfer_code: Joi.string().required()
+});
+exports.wasteAvailabilityValidationSchema = Joi.object().keys({
+    location: Joi.string().required(),
+});
+exports.setPinValidationSchema = Joi.object().keys({
+    walletPin: Joi.string().required().min(4).max(4),
+});
+exports.makePaymentValidationSchema = Joi.object().keys({
+    receiverUsername: Joi.string().required(),
+    walletPin: Joi.string().required().min(4).max(4),
+    amount: Joi.string().required(),
+});
+exports.searchValidationSchema = Joi.object().keys({
+    username: Joi.string().required(),
 });

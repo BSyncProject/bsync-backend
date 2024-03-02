@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.finalizeTransfer = exports.makeTransfer = exports.startWithdrawal = exports.verifyDeposit = exports.deposit = void 0;
+exports.makeTransfer = exports.startWithdrawal = exports.verifyDeposit = exports.deposit = void 0;
 const deposit = (amount, email) => __awaiter(void 0, void 0, void 0, function* () {
     const requestData = {
         email: email,
@@ -118,31 +118,29 @@ const makeTransfer = (amount, recipient_code) => __awaiter(void 0, void 0, void 
     return response;
 });
 exports.makeTransfer = makeTransfer;
-const finalizeTransfer = (otp, transfer_code) => __awaiter(void 0, void 0, void 0, function* () {
-    const url = process.env.FINAL_PAYMENT || 'make transfer';
-    const requestData = JSON.stringify({
-        transfer_code: transfer_code,
-        otp: otp,
-    });
-    try {
-        const responseData = yield fetch(url, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${process.env.PAYMENT_SECRET_KEY}`,
-                "Content-Type": "application/json",
-            },
-            body: requestData
-        })
-            .then(response => {
-            if (!response.ok) {
-                throw new Error(`${response.json()}`);
-            }
-            return response.json();
-        });
-        return responseData;
-    }
-    catch (error) {
-        return `${error}`;
-    }
-});
-exports.finalizeTransfer = finalizeTransfer;
+// export const finalizeTransfer = async (otp: number, transfer_code: string) => {
+//   const url = process.env.FINAL_PAYMENT || 'make transfer';
+//   const requestData = JSON.stringify({ 
+//     transfer_code: transfer_code, 
+//     otp: otp,
+//   })
+//   try{
+//     const responseData = await fetch(url, {
+//       method: "POST",
+//       headers: {
+//         "Authorization": `Bearer ${process.env.PAYMENT_SECRET_KEY}`,
+//         "Content-Type": "application/json",
+//       },
+//       body: requestData
+//     })
+//     .then(response => {
+//       if (!response.ok) {
+//         throw new Error(`${response.json()}`);
+//       }
+//       return response.json();
+//     })
+//     return responseData;
+//   } catch(error) {
+//     return`${error}`;
+//   }
+// }

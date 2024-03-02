@@ -13,6 +13,8 @@ const {
   addPicker,
   deletePicker,
   updatePicker,
+  getWallet,
+  getAvailableWaste,
 
 } = require('../controllers/CollectorController');
 
@@ -28,5 +30,7 @@ router.post('/become-agent', becomeAgentPermission);
 router.post('/delete/picker', deletePicker);
 router.post('/add/picker', addPicker);
 router.post('/update/picker', updatePicker);
+router.get('/wallet', getWallet );
+router.get('/waste/:location', getAvailableWaste);
 
 module.exports = router;

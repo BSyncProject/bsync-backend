@@ -29,5 +29,6 @@ const walletSchema = new mongoose_1.Schema({
     transactionHistory: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Transaction' }],
     owner: { type: String, required: true },
     balance: { type: Number, required: true },
+    pin: { type: String, required: true },
 });
 exports.WalletModel = mongoose_1.default.model('Wallet', walletSchema);

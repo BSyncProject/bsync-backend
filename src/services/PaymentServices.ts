@@ -131,39 +131,39 @@ export const makeTransfer  = async (amount: number, recipient_code: string) => {
 
 }
 
-export const finalizeTransfer = async (otp: number, transfer_code: string) => {
+// export const finalizeTransfer = async (otp: number, transfer_code: string) => {
 
-  const url = process.env.FINAL_PAYMENT || 'make transfer';
+//   const url = process.env.FINAL_PAYMENT || 'make transfer';
 
-  const requestData = JSON.stringify({ 
-    transfer_code: transfer_code, 
-    otp: otp,
-  })
+//   const requestData = JSON.stringify({ 
+//     transfer_code: transfer_code, 
+//     otp: otp,
+//   })
 
-  try{
+//   try{
 
-    const responseData = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.PAYMENT_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: requestData
-    })
+//     const responseData = await fetch(url, {
+//       method: "POST",
+//       headers: {
+//         "Authorization": `Bearer ${process.env.PAYMENT_SECRET_KEY}`,
+//         "Content-Type": "application/json",
+//       },
+//       body: requestData
+//     })
   
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`${response.json()}`);
-      }
-      return response.json();
-    })
+//     .then(response => {
+//       if (!response.ok) {
+//         throw new Error(`${response.json()}`);
+//       }
+//       return response.json();
+//     })
     
-    return responseData;
+//     return responseData;
     
-  } catch(error) {
-    return`${error}`;
-  }
+//   } catch(error) {
+//     return`${error}`;
+//   }
 
-}
+// }
 
 

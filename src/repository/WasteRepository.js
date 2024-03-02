@@ -17,6 +17,12 @@ class WasteRepository {
             return newWaste;
         });
     }
+    findWastesWithAddress(address) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const wastes = yield Waste_1.WasteModel.find({ location: address }).exec();
+            return wastes;
+        });
+    }
     getAll() {
         return __awaiter(this, void 0, void 0, function* () {
             const allWastes = yield Waste_1.WasteModel.find().populate('producer').exec();

@@ -7,6 +7,11 @@ class WasteRepository {
     return newWaste;
   }
 
+  async findWastesWithAddress(address: string): Promise<Waste[]>{
+    const wastes = await WasteModel.find({location: address}).exec();
+    return wastes;
+  }
+
   async getAll(): Promise<Waste[]> {
     const allWastes = await WasteModel.find().populate('producer').exec();
     return allWastes;
