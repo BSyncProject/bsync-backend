@@ -34,10 +34,6 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
 const PORT = process.env.PORT || 3000;
 const DATABASE_URL = process.env.DATABASE_URI || "";
 
-
-console.log(PORT);
-console.log(DATABASE_URL);
-
 mongoose.connect(DATABASE_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,

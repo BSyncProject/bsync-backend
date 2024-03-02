@@ -17,6 +17,12 @@ class TransactionRepository {
             return newTransaction;
         });
     }
+    findOne(reference) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const transaction = yield Transaction_1.TransactionModel.findOne({ reference: reference });
+            return transaction;
+        });
+    }
     getAll() {
         return __awaiter(this, void 0, void 0, function* () {
             const allTransactions = yield Transaction_1.TransactionModel.find().exec();

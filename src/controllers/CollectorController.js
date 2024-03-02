@@ -169,13 +169,40 @@ const deletePicker = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
     try {
         const collector = checkCollectorIsProvided(req);
         const { phoneNumber, } = yield servicesValidationSchema_1.deletePickerValidationSchema.validateAsync(req.body);
-        const picker = yield (0, CollectorServices_1.deletePickerr)(phoneNumber, collector);
-        if (!picker) {
+        const response = yield (0, CollectorServices_1.deletePickerr)(phoneNumber, collector);
+        if (!response) {
             throw new Error(" An error occurred, try again");
         }
         res.status(200).json({
             status: 'success',
             message: "Picker deleted Successfully",
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const updatePicker = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const { phoneNumber, name, address, serviceArea } = yield servicesValidationSchema_1.updatePickerValidationSchema.validateAsync(req.body);
+        const pickerData = {
+            name: name,
+            address: address,
+            phoneNumber: phoneNumber,
+            serviceArea: serviceArea,
+        };
+        const picker = yield (0, CollectorServices_1.updatePickerr)(phoneNumber, pickerData, collector);
+        if (!picker) {
+            throw new Error(" An error occurred, try again");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "Picker Updated Successfully",
+            data: picker,
         });
     }
     catch (error) {
@@ -194,4 +221,5 @@ module.exports = {
     becomeAgentPermission,
     addPicker,
     deletePicker,
+    updatePicker,
 };

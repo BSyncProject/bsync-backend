@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import {addPickerr, becomeAgent, deletePickerr, login, makeDeposit, makeWithdrawal, signUpCollector, verifyCollectorDeposit} from '../services/CollectorServices'; 
+import {addPickerr, becomeAgent, deletePickerr, login, makeDeposit, makeWithdrawal, signUpCollector, updatePickerr, verifyCollectorDeposit} from '../services/CollectorServices'; 
 import {signToken} from '../utils/tokenUtils'
 import {
   signupValidationSchema, 
@@ -11,6 +11,7 @@ import {
   depositValidationSchema,
   addPickerValidationSchema,
   deletePickerValidationSchema,
+  updatePickerValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Collection } from 'mongoose';
@@ -261,7 +262,45 @@ const deletePicker = catchAsync(async (req: CustomRequest, res: Response) => {
       phoneNumber,
     } = await deletePickerValidationSchema.validateAsync(req.body)
 
-    const picker = await deletePickerr(phoneNumber, collector)
+    const response = await deletePickerr(phoneNumber, collector)
+
+    if (!response) {
+      throw new Error(" An error occurred, try again");
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Picker deleted Successfully",
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+const updatePicker = catchAsync(async(req: CustomRequest, res: Response) => {
+  try{
+
+    const collector: Collector = checkCollectorIsProvided(req);
+    const {
+      phoneNumber,
+      name,
+      address,
+      serviceArea
+
+    } = await updatePickerValidationSchema.validateAsync(req.body);
+
+    const pickerData: Partial<Picker> = {
+      name: name,
+      address: address,
+      phoneNumber: phoneNumber,
+      serviceArea: serviceArea,
+    }
+
+    const picker = await updatePickerr(phoneNumber, pickerData, collector);
 
     if (!picker) {
       throw new Error(" An error occurred, try again");
@@ -269,7 +308,8 @@ const deletePicker = catchAsync(async (req: CustomRequest, res: Response) => {
 
     res.status(200).json({
       status: 'success',
-      message: "Picker deleted Successfully",
+      message: "Picker Updated Successfully",
+      data: picker,
     });
 
   } catch(error:any){
@@ -290,6 +330,7 @@ module.exports = {
   becomeAgentPermission,
   addPicker,
   deletePicker,
-  
+  updatePicker,
+
 
 }

@@ -28,8 +28,6 @@ app.use((err, req, res, next) => {
 });
 const PORT = process.env.PORT || 3000;
 const DATABASE_URL = process.env.DATABASE_URI || "";
-console.log(PORT);
-console.log(DATABASE_URL);
 mongoose_1.default.connect(DATABASE_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,

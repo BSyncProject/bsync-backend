@@ -12,14 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatePickerr = exports.deletePickerr = exports.addPickerr = exports.becomeAgent = exports.completeWithdrawal = exports.makeWithdrawal = exports.verifyCollectorDeposit = exports.makeDeposit = exports.login = exports.signUpCollector = void 0;
+exports.updatePickerr = exports.deletePickerr = exports.addPickerr = exports.becomeAgent = exports.makePayment = exports.completeWithdrawal = exports.makeWithdrawal = exports.verifyCollectorDeposit = exports.makeDeposit = exports.login = exports.signUpCollector = void 0;
 const CollectorRepository_1 = __importDefault(require("../repository/CollectorRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
 const PickerServices_1 = __importDefault(require("../services/PickerServices"));
+const PaymentServices_1 = require("./PaymentServices");
+const TransactionRepository_1 = __importDefault(require("../repository/TransactionRepository"));
 const collectorRepository = new CollectorRepository_1.default();
 const walletRepository = new WalletRepository_1.default();
 const pickerServices = new PickerServices_1.default();
+const transactionRepository = new TransactionRepository_1.default();
 function signUpCollector(signUpData) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!signUpData.password || !signUpData.username || !signUpData.email) {
@@ -81,52 +84,114 @@ const comparePasswords = (plainPassword, hashedPassword) => __awaiter(void 0, vo
 });
 function makeDeposit(amount, email) {
     return __awaiter(this, void 0, void 0, function* () {
-        const depositResponse = yield deposit(amount, email);
+        const depositResponse = yield (0, PaymentServices_1.deposit)(amount, email);
         if (!depositResponse.data) {
             throw new Error("An error occurred, Try again later");
         }
-        const { createdData } = depositResponse.data;
-        return createdData;
+        return depositResponse.data;
     });
 }
 exports.makeDeposit = makeDeposit;
 function verifyCollectorDeposit(reference, collector) {
     return __awaiter(this, void 0, void 0, function* () {
-        const data = yield verifyDeposit(reference);
-        if (!data.data && !(data.message == "Verification successful")) {
-            const wallet = collector.wallet;
-            wallet.balance = wallet.balance += data.data.amount;
-            walletRepository.update(wallet._id, wallet);
+        const data = yield (0, PaymentServices_1.verifyDeposit)(reference);
+        if (!data.data || !(data.message == "Verification successful")) {
+            throw new Error("Verification not successful");
         }
+        const wallet = yield walletRepository.findOne(collector.username);
+        if (!wallet) {
+            throw new Error("Wallet not Found");
+        }
+        checkTransactionReference(reference);
+        const transaction = createTransaction(collector.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
+        wallet.balance = wallet.balance += data.data.amount;
+        wallet.transactionHistory.push((yield transaction));
+        walletRepository.update(wallet._id, wallet);
         return data;
     });
 }
 exports.verifyCollectorDeposit = verifyCollectorDeposit;
 function makeWithdrawal(name, accountNumber, bank_code, amount, collector) {
     return __awaiter(this, void 0, void 0, function* () {
-        const withdrawData = yield startWithdrawal(name, accountNumber, bank_code, amount);
-        if (collector) {
-            const wallet = yield walletRepository.findOne(collector.username);
-            if (!wallet) {
-                throw new Error('An error occurred');
+        try {
+            let withdrawData;
+            if (collector) {
+                const wallet = yield walletRepository.findOne(collector.username);
+                if (!wallet) {
+                    throw new Error('An error occurred');
+                }
+                if (wallet.balance < amount) {
+                    throw new Error("Insufficient Fund");
+                }
+                withdrawData = yield (0, PaymentServices_1.startWithdrawal)(name, accountNumber, bank_code, amount);
             }
-            if (wallet.balance < amount) {
-                throw new Error("Insufficient Fund");
-            }
-            wallet.balance = wallet.balance -= amount;
-            walletRepository.update(wallet._id, wallet);
+            return withdrawData;
         }
-        return withdrawData;
+        catch (error) {
+            throw new Error(`${error}`);
+        }
     });
 }
 exports.makeWithdrawal = makeWithdrawal;
-function completeWithdrawal(otp, transfer_code) {
+const checkTransactionReference = (reference) => __awaiter(void 0, void 0, void 0, function* () {
+    const transaction = yield transactionRepository.findOne(reference);
+    if (transaction) {
+        throw new Error("Transaction Already Verified");
+    }
+});
+function createTransaction(sender, receiver, reference, type, amount, date) {
+    const transactionData = {
+        sender: sender,
+        type: type,
+        receiver: receiver,
+        amount: amount,
+        reference: reference,
+        comment: type,
+        date: date,
+    };
+    const transaction = transactionRepository.create(transactionData);
+    return transaction;
+}
+function completeWithdrawal(otp, transfer_code, collector) {
     return __awaiter(this, void 0, void 0, function* () {
-        const completedData = finalizeTransfer(otp, transfer_code);
+        const completedData = yield (0, PaymentServices_1.finalizeTransfer)(otp, transfer_code);
+        if (!completedData) {
+            throw new Error("An Error occurred");
+        }
+        const wallet = yield walletRepository.findOne(collector.username);
+        if (!wallet) {
+            throw new Error('An error occurred');
+        }
+        checkTransactionReference(completedData.data.reference);
+        const transaction = createTransaction("Bsync", collector.username, completedData.data.reference, "Withdrawal", completedData.data.amount, completedData.data.create_at);
+        wallet.balance = wallet.balance -= completedData.data.amount;
+        wallet.transactionHistory.push((yield transaction));
+        walletRepository.update(wallet._id, wallet);
         return completedData;
     });
 }
 exports.completeWithdrawal = completeWithdrawal;
+function makePayment(collector, producer, amount) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const senderWallet = yield walletRepository.findOne(collector.username);
+        const receiverWallet = yield walletRepository.findOne(producer.username);
+        if (!senderWallet || !receiverWallet) {
+            throw new Error('Wallet not found');
+        }
+        if (senderWallet.balance < amount) {
+            throw new Error('Insufficient Balance');
+        }
+        senderWallet.balance = senderWallet.balance - amount;
+        receiverWallet.balance = receiverWallet.balance + amount;
+        const senderTransaction = yield createTransaction(collector.username, producer.username, `${Date.now()}`, "Debit", amount, String(Date.now()));
+        senderWallet.transactionHistory.push((yield senderTransaction));
+        const receiverTransaction = yield createTransaction(collector.username, producer.username, `${Date.now()}`, "Credit", amount, String(Date.now()));
+        receiverWallet.transactionHistory.push(receiverTransaction);
+        walletRepository.update(senderWallet._id, senderWallet);
+        walletRepository.update(receiverWallet._id, receiverWallet);
+    });
+}
+exports.makePayment = makePayment;
 function becomeAgent(collector) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!collector) {

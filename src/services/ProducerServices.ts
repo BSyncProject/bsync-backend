@@ -5,11 +5,23 @@ import ProducerRepository from '../repository/ ProducerRepository';
 import WalletRepository from '../repository/WalletRepository';
 import bcrypt from 'bcrypt';
 import WasteRepository from '../repository/WasteRepository';
+import TransactionRepository from '../repository/TransactionRepository';
+import {
+  deposit, 
+  verifyDeposit, 
+  startWithdrawal, 
+  finalizeTransfer,
+  makeTransfer
+} from './PaymentServices';
+import { Transaction } from '../models/Transaction';
+
+
 
 
 const producerRepository = new ProducerRepository();
 const walletRepository = new WalletRepository();
 const wasteRepository = new WasteRepository();
+const transactionRepository = new TransactionRepository();
 
 
 export async function signUp(signUpData: Partial<Producer>): Promise<Producer> {
@@ -110,10 +122,10 @@ export async function makeDeposit(amount: number, email: string): Promise<any>{
   const depositResponse = await deposit(amount, email);
 
   if(!depositResponse.data){
-    throw new Error("An error occurred, Try again later")
+    throw new Error("An error occurred, Try again")
   }
-  const {createdData} = depositResponse.data
-  return createdData;
+
+  return depositResponse.data
 
 }
 
@@ -121,46 +133,98 @@ export async function verifyProducerDeposit(reference: string, producer: Produce
 
   const data = await verifyDeposit(reference);
 
-  if (!data.data && !(data.message == "Verification successful")){
-
-    const wallet = producer.wallet;
-    wallet.balance = wallet.balance += data.data.amount;
-    walletRepository.update(wallet._id, wallet);
-
+  if (!data.data || !(data.message == "Verification successful")){
+    throw new Error("Verification not successful");
+  }
+  const wallet = await walletRepository.findOne(producer.username);
+  if(!wallet){
+    throw new Error("Wallet not Found");
   }
 
-  return data;
+  checkTransactionReference(reference);
+  
+  const transaction = createTransaction(producer.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
+  wallet.balance = wallet.balance + data.data.amount;
+  wallet.transactionHistory.push((await transaction));
+  walletRepository.update(wallet._id, wallet);
 
+  return data;
+}
+
+const checkTransactionReference = async(reference: string): Promise<void> => {
+
+  const transaction = await transactionRepository.findOne(reference);
+
+  if(transaction){
+    throw new Error("Transaction Already Verified");
+  }
+  
+}
+
+function createTransaction(sender: string, receiver: string, reference: string, type: string, amount: number, date: string) {
+  const transactionData: Partial<Transaction> = {
+    sender: sender,
+    type: type,
+    receiver: receiver,
+    amount: amount,
+    reference: reference,
+    comment: type,
+    date: date,
+  };
+  const transaction = transactionRepository.create(transactionData);
+  return transaction;
 }
 
 export async function makeWithdrawal(name: string, accountNumber: string, bank_code: string, amount: number, producer: Producer): Promise<any>{
 
-  let withdrawData;
+  try{
+    let withdrawData;
 
-  if (producer){
-    
-    const wallet = await walletRepository.findOne(producer.username);
+    if (producer){
+      const wallet = await walletRepository.findOne(producer.username);
 
-    if(!wallet){
-      throw new Error('An error occurred');
+      if(!wallet){
+        throw new Error('Producer does not have a wallet');
+      }
+
+      if(wallet.balance < amount){
+        throw new Error("Insufficient Balance");
+      }
+      const data = await startWithdrawal(name, accountNumber, bank_code, amount);
+      
+      withdrawData = await makeTransfer(amount, data.recipient_code);
+
     }
-
-    if(wallet.balance < amount){
-      throw new Error("Insufficient Fund");
-    }
-
-    withdrawData = await startWithdrawal(name, accountNumber, bank_code, amount);
-    wallet.balance = wallet.balance -= (amount);
-    walletRepository.update(wallet._id, wallet);
-
+  
+    return withdrawData;
+  } catch(error: any){
+    throw new Error(`${error}`);
   }
   
-  return withdrawData;
 }
 
-export async function completeWithdrawal(otp: number, transfer_code: string): Promise<any> {
+export async function completeWithdrawal(otp: number, transfer_code: string, producer: Producer): Promise<any> {
 
-  const completedData = finalizeTransfer(otp, transfer_code);
+  const completedData = await finalizeTransfer(otp, transfer_code);
+
+  if(!completedData){
+    throw new Error("An Error occurred")
+  }
+
+  const wallet = await walletRepository.findOne(producer.username);
+  
+  if(!wallet){
+    throw new Error('An error occurred');
+  }
+
+  checkTransactionReference(completedData.data.reference);
+  
+  const transaction = createTransaction("Bsync",producer.username, completedData.data.reference, "Withdrawal", completedData.data.amount, completedData.data.create_at);
+
+  wallet.balance = wallet.balance - completedData.data.amount;
+  wallet.transactionHistory.push((await transaction));
+  walletRepository.update(wallet._id, wallet);
+
   return completedData;
 
 }

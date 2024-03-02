@@ -8,7 +8,7 @@ class WalletRepository {
 
   async findOne(username: string): Promise<Wallet | null> {
 
-    const wallet = await WalletModel.findOne({username: username});
+    const wallet = await WalletModel.findOne({owner: username});
     return wallet;
   }
 
