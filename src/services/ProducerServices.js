@@ -132,9 +132,9 @@ function verifyProducerDeposit(reference, producer, walletPin) {
         }
         checkWalletPin(walletPin, wallet.pin);
         yield checkTransactionReference(reference);
-        const transaction = yield createTransaction(producer.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
-        wallet.balance = wallet.balance + data.data.amount;
-        wallet.transactionHistory.push((yield transaction));
+        const transaction = yield createTransaction(producer.username, "BSYNC", reference, "Deposit", (data.data.amount / 100), data.data.paid_at);
+        wallet.balance = wallet.balance + (data.data.amount / 100);
+        wallet.transactionHistory.push(transaction);
         walletRepository.update(wallet._id, wallet);
         return data;
     });
@@ -186,8 +186,8 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, producer, wallet
             const data = yield (0, PaymentServices_1.startWithdrawal)(name, accountNumber, bank_code, amount);
             const withdrawData = yield (0, PaymentServices_1.makeTransfer)(amount, data.recipient_code);
             yield checkTransactionReference(withdrawData.data.reference);
-            const transaction = yield createTransaction("Bsync", producer.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount, withdrawData.data.createdAt);
-            wallet.balance = wallet.balance - withdrawData.data.amount;
+            const transaction = yield createTransaction("Bsync", producer.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount / 100, withdrawData.data.createdAt);
+            wallet.balance = wallet.balance - (withdrawData.data.amount / 100);
             wallet.transactionHistory.push(transaction);
             walletRepository.update(wallet._id, wallet);
             return withdrawData;
@@ -200,10 +200,11 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, producer, wallet
 exports.makeWithdrawal = makeWithdrawal;
 function setWalletPin(walletPin, producer) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(walletPin);
         const wallet = yield getProducerWallet(producer);
+        if (!(wallet.pin === 'null')) {
+            throw new Error("Failed!, Wallet Pin already set");
+        }
         wallet.pin = yield encode(walletPin);
-        ;
         walletRepository.update(wallet._id, wallet);
         return wallet;
     });

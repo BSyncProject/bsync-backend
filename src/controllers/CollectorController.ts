@@ -29,7 +29,6 @@ import {
   addPickerValidationSchema,
   deletePickerValidationSchema,
   updatePickerValidationSchema,
-  finalizeWithdrawalValidationSchema,
   verifyDepositValidationSchema,
   wasteAvailabilityValidationSchema,
   setPinValidationSchema,
@@ -130,12 +129,12 @@ const collectorWithdrawal = catchAsync(async (req: CustomRequest, res: Response)
 
     res.status(200).json({
       status: 'success',
-      message: "withdrawal process start, check your phone for otp",
+      message: "withdrawal Successful",
       data: response,
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -166,7 +165,7 @@ const collectorDeposit = catchAsync(async (req: CustomRequest, res: Response) =>
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -198,7 +197,7 @@ const verifyCollDeposit = catchAsync(async (req: CustomRequest, res: Response) =
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -228,7 +227,7 @@ const setPin = catchAsync(async (req: CustomRequest, res: Response) => {
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -263,7 +262,7 @@ const becomeAgentPermission = catchAsync(async (req: CustomRequest, res: Respons
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -302,7 +301,7 @@ const addPicker = catchAsync(async (req: CustomRequest, res: Response) => {
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -330,7 +329,7 @@ const deletePicker = catchAsync(async (req: CustomRequest, res: Response) => {
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -369,7 +368,7 @@ const updatePicker = catchAsync(async(req: CustomRequest, res: Response) => {
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -448,7 +447,7 @@ const makePaymentC = catchAsync(async (req: CustomRequest, res: Response) => {
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: 'An error occurred: ' + `${error}`,
     })
@@ -479,7 +478,7 @@ const findCollector = catchAsync(async (req: CustomRequest, res: Response) => {
     });
 
   } catch(error:any){
-    res.status(error.status).json({
+    res.status(500).json({
       status: 'failed',
       message: `${error}`,
     })
