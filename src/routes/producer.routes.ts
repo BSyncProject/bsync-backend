@@ -9,6 +9,10 @@ const {
   depositMoney,
   withdrawMoney,
   verifyDeposit,
+  getWallet,
+  setPin,
+  makePaymentP,
+  findProducer,
 } = require('../controllers/ProducerController');
 
 const {producerAuth} = require('../middleware/producerAuth');
@@ -23,6 +27,10 @@ router.post('/withdrawal', withdrawMoney);
 router.post('/deposit', depositMoney);
 router.post('/verifyDeposit', verifyDeposit);
 router.delete('./delete', deleteWastes);
+router.get('/wallet', getWallet);
+router.post('/wallet/pin', setPin);
+router.post('/transfer', makePaymentP);
+router.get('/find/:username', findProducer)
 
 
 module.exports = router;

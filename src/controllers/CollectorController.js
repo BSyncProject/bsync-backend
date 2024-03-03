@@ -292,21 +292,21 @@ const makePaymentC = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
 const findCollector = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const collector = checkCollectorIsProvided(req);
-        const { username, } = yield servicesValidationSchema_1.searchValidationSchema.validateAsync(req.body);
+        const { username, } = yield servicesValidationSchema_1.searchValidationSchema.validateAsync(req.params.username);
         const foundCollector = yield (0, CollectorServices_1.getCollector)(username);
         if (!foundCollector) {
             throw new Error(" An error occurred");
         }
         res.status(200).json({
             status: 'success',
-            message: "Producer found",
+            message: "Collector found",
             data: foundCollector,
         });
     }
     catch (error) {
         res.status(error.status).json({
             status: 'failed',
-            message: 'An error occurred: ' + `${error}`,
+            message: `${error}`,
         });
     }
 }));

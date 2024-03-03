@@ -13,7 +13,7 @@ exports.makeTransfer = exports.startWithdrawal = exports.verifyDeposit = exports
 const deposit = (amount, email) => __awaiter(void 0, void 0, void 0, function* () {
     const requestData = {
         email: email,
-        amount: amount,
+        amount: (amount * 10),
     };
     const requestOptions = {
         method: 'POST',
@@ -98,7 +98,7 @@ const makeTransfer = (amount, recipient_code) => __awaiter(void 0, void 0, void 
     const requestData = JSON.stringify({
         source: "balance",
         reason: "Bsync Withdrawal Payment",
-        amount: amount,
+        amount: (amount * 10),
         recipient: recipient_code,
     });
     const response = yield fetch(url, {

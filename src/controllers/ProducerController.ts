@@ -26,7 +26,6 @@ import {
   deleteWasteValidationSchema,
   depositValidationSchema,
   verifyDepositValidationSchema,
-  finalizeWithdrawalValidationSchema,
   setPinValidationSchema,
   makePaymentValidationSchema,
   searchValidationSchema,
@@ -202,36 +201,6 @@ const withdrawMoney = catchAsync(async (req: CustomRequest, res: Response) => {
   }
 })
 
-// const finalizeWithdrawal = catchAsync(async (req: CustomRequest, res: Response) => {
-
-//   try{
-
-//     const producer = checkProducerIsProvided(req);
-
-//     const {
-//       otp,
-//       transfer_code,
-//     } = await finalizeWithdrawalValidationSchema.validateAsync(req.body);
-
-//     const response = await completeWithdrawal(otp, transfer_code ,producer);
-
-//     if (!response) {
-//       throw new Error(" An error occurred")
-//     }
-
-//     res.status(200).json({
-//       status: 'success',
-//       message: "withdrawal successful",
-//       data: response,
-//     });
-
-//   } catch(error:any){
-//     res.status(500).json({
-//       status: 'failed',
-//       message: 'An error occurred: ' + `${error}`,
-//     })
-//   }
-// })
 
 const depositMoney = catchAsync(async (req: CustomRequest, res: Response) => {
 
@@ -332,7 +301,7 @@ const setPin = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const {
       walletPin
-    } = setPinValidationSchema.validateAsync(req.body);
+    } = await setPinValidationSchema.validateAsync(req.body);
 
     const wallet = await setWalletPin(walletPin, producer);
 
@@ -390,7 +359,7 @@ const findProducer = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const {
       username,
-    } = await searchValidationSchema.validateAsync(req.body);
+    } = await searchValidationSchema.validateAsync(req.params.username);
 
     const foundProducer = await getProducer(username);
 

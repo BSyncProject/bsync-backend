@@ -58,13 +58,12 @@ export const wasteAvailabilityValidationSchema = Joi.object().keys({
 })
 
 export const setPinValidationSchema = Joi.object().keys({
-  walletPin: Joi.string().required().min(4).max(4),
-})
-
+  walletPin: Joi.string().required().length(4),
+});
 
 export const makePaymentValidationSchema = Joi.object().keys({
   receiverUsername: Joi.string().required(),
-  walletPin: Joi.string().required().min(4).max(4),
+  walletPin: Joi.string().required(),
   amount: Joi.string().required(),
 })
 

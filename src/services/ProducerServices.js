@@ -50,11 +50,12 @@ function createNewWallet(username) {
         return newWallet;
     });
 }
-function encode(password) {
+function encode(word) {
     return __awaiter(this, void 0, void 0, function* () {
         const saltRounds = 10;
-        const hashedPassword = yield bcrypt_1.default.hash(password, saltRounds);
-        return hashedPassword;
+        const salt = bcrypt_1.default.genSaltSync(saltRounds);
+        const hashedWord = bcrypt_1.default.hashSync(word, salt);
+        return hashedWord;
     });
 }
 function login(loginData) {
@@ -74,9 +75,9 @@ function login(loginData) {
     });
 }
 exports.login = login;
-const compare = (plainPassword, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
+const compare = (plainWord, hashedWord) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        return yield bcrypt_1.default.compare(plainPassword, hashedPassword);
+        return yield bcrypt_1.default.compare(plainWord, hashedWord);
     }
     catch (error) {
         console.error('Error comparing:', error);
@@ -108,6 +109,9 @@ function deleteWaste(waste_id, producer) {
 exports.deleteWaste = deleteWaste;
 function makeDeposit(amount, email) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (amount <= 99) {
+            throw new Error("Invalid Amount, Minimum amount is 100");
+        }
         const depositResponse = yield (0, PaymentServices_1.deposit)(amount, email);
         if (!depositResponse.data) {
             throw new Error("An error occurred, Try again");
@@ -127,7 +131,7 @@ function verifyProducerDeposit(reference, producer, walletPin) {
             throw new Error("Wallet not Found");
         }
         checkWalletPin(walletPin, wallet.pin);
-        checkTransactionReference(reference);
+        yield checkTransactionReference(reference);
         const transaction = createTransaction(producer.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
         wallet.balance = wallet.balance + data.data.amount;
         wallet.transactionHistory.push((yield transaction));
@@ -166,6 +170,9 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, producer, wallet
             if (!producer) {
                 throw new Error("Producer is not provided");
             }
+            if (amount <= 99) {
+                throw new Error("Invalid Amount, Minimum amount is 100");
+            }
             const wallet = yield walletRepository.findOne(producer.username);
             if (!wallet) {
                 throw new Error('Producer does not have a wallet');
@@ -191,8 +198,10 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, producer, wallet
 exports.makeWithdrawal = makeWithdrawal;
 function setWalletPin(walletPin, producer) {
     return __awaiter(this, void 0, void 0, function* () {
-        const wallet = yield getWallet(producer.username);
+        console.log(walletPin);
+        const wallet = yield getProducerWallet(producer);
         wallet.pin = yield encode(walletPin);
+        ;
         walletRepository.update(wallet._id, wallet);
         return wallet;
     });
@@ -200,6 +209,9 @@ function setWalletPin(walletPin, producer) {
 exports.setWalletPin = setWalletPin;
 function makePayment(producer, collectorUsername, amount, walletPin) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (amount <= 99) {
+            throw new Error("Invalid Amount, Minimum amount is 100");
+        }
         const collector = yield (0, CollectorServices_1.getCollector)(collectorUsername);
         const senderWallet = yield walletRepository.findOne(producer.username);
         const receiverWallet = yield walletRepository.findOne(collector.username);

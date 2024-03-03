@@ -114,29 +114,6 @@ const withdrawMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
         });
     }
 }));
-// const finalizeWithdrawal = catchAsync(async (req: CustomRequest, res: Response) => {
-//   try{
-//     const producer = checkProducerIsProvided(req);
-//     const {
-//       otp,
-//       transfer_code,
-//     } = await finalizeWithdrawalValidationSchema.validateAsync(req.body);
-//     const response = await completeWithdrawal(otp, transfer_code ,producer);
-//     if (!response) {
-//       throw new Error(" An error occurred")
-//     }
-//     res.status(200).json({
-//       status: 'success',
-//       message: "withdrawal successful",
-//       data: response,
-//     });
-//   } catch(error:any){
-//     res.status(500).json({
-//       status: 'failed',
-//       message: 'An error occurred: ' + `${error}`,
-//     })
-//   }
-// })
 const depositMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const producer = checkProducerIsProvided(req);
@@ -203,7 +180,7 @@ const getWallet = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fun
 const setPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const producer = checkProducerIsProvided(req);
-        const { walletPin } = servicesValidationSchema_1.setPinValidationSchema.validateAsync(req.body);
+        const { walletPin } = yield servicesValidationSchema_1.setPinValidationSchema.validateAsync(req.body);
         const wallet = yield (0, ProducerServices_1.setWalletPin)(walletPin, producer);
         res.status(200).json({
             status: 'success',
@@ -242,7 +219,7 @@ const makePaymentP = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
 const findProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const producer = checkProducerIsProvided(req);
-        const { username, } = yield servicesValidationSchema_1.searchValidationSchema.validateAsync(req.body);
+        const { username, } = yield servicesValidationSchema_1.searchValidationSchema.validateAsync(req.params.username);
         const foundProducer = yield (0, ProducerServices_1.getProducer)(username);
         if (!foundProducer) {
             throw new Error(" An error occurred");

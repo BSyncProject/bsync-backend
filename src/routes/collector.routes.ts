@@ -15,6 +15,9 @@ const {
   updatePicker,
   getWallet,
   getAvailableWaste,
+  setPin,
+  makePaymentC,
+  findCollector,
 
 } = require('../controllers/CollectorController');
 
@@ -32,5 +35,8 @@ router.post('/add/picker', addPicker);
 router.post('/update/picker', updatePicker);
 router.get('/wallet', getWallet );
 router.get('/waste/:location', getAvailableWaste);
+router.post('/transfer', makePaymentC);
+router.post('/wallet/pin', setPin);
+router.get('/find/:username', findCollector);
 
 module.exports = router;
