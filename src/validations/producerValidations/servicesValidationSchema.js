@@ -47,11 +47,11 @@ exports.wasteAvailabilityValidationSchema = Joi.object().keys({
     location: Joi.string().required(),
 });
 exports.setPinValidationSchema = Joi.object().keys({
-    walletPin: Joi.string().required().min(4).max(4),
+    walletPin: Joi.string().required().length(4),
 });
 exports.makePaymentValidationSchema = Joi.object().keys({
     receiverUsername: Joi.string().required(),
-    walletPin: Joi.string().required().min(4).max(4),
+    walletPin: Joi.string().required(),
     amount: Joi.string().required(),
 });
 exports.searchValidationSchema = Joi.object().keys({

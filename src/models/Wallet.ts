@@ -13,7 +13,7 @@ const walletSchema: Schema = new Schema({
   transactionHistory: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }],
   owner: { type: String, required: true },
   balance: { type: Number, required: true },
-  pin: { type: String, required: true},
+  pin: { type: String},
 });
 
 export const WalletModel = mongoose.model<Wallet>('Wallet', walletSchema);

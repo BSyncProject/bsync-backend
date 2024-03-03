@@ -5,7 +5,7 @@ export const deposit = async(amount:number,  email: string) => {
 
     const requestData = {
       email: email,
-      amount: amount,
+      amount: (amount * 10),
     };
 
     const requestOptions = {
@@ -108,7 +108,7 @@ export const makeTransfer  = async (amount: number, recipient_code: string) => {
   const requestData = JSON.stringify({
     source: "balance",
     reason: "Bsync Withdrawal Payment",
-    amount: amount,
+    amount: (amount * 10),
     recipient: recipient_code,
   });
 

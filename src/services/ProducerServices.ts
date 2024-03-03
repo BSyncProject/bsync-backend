@@ -53,10 +53,11 @@ async function createNewWallet(username: string): Promise<Wallet> {
 
 }
 
-async function encode(password: string) {
+async function encode(word: string) {
   const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-  return hashedPassword;
+  const salt = bcrypt.genSaltSync(saltRounds);
+  const hashedWord = bcrypt.hashSync(word, salt);
+  return hashedWord;
 }
 
 export async function login(loginData: Partial<Producer>): Promise<Producer> {
@@ -81,9 +82,9 @@ export async function login(loginData: Partial<Producer>): Promise<Producer> {
 
 }
 
-const compare = async (plainPassword: string, hashedPassword: string): Promise<boolean> => {
+const compare = async (plainWord: string, hashedWord: string): Promise<boolean> => {
   try {
-    return await bcrypt.compare(plainPassword, hashedPassword);
+    return await bcrypt.compare(plainWord, hashedWord);
   } catch (error) {
     console.error('Error comparing:', error);
     return false; 
@@ -118,6 +119,9 @@ export async function deleteWaste(waste_id: Partial<string>, producer: Producer)
 
 export async function makeDeposit(amount: number, email: string): Promise<any>{
 
+  if(amount <= 99){
+    throw new Error("Invalid Amount, Minimum amount is 100");
+  }
   const depositResponse = await deposit(amount, email);
 
   if(!depositResponse.data){
@@ -142,7 +146,7 @@ export async function verifyProducerDeposit(reference: string, producer: Produce
   }
 
   checkWalletPin(walletPin, wallet.pin);
-  checkTransactionReference(reference);
+  await checkTransactionReference(reference);
   
   const transaction = createTransaction(producer.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
   wallet.balance = wallet.balance + data.data.amount;
@@ -189,7 +193,9 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
     if (!producer){
       throw new Error("Producer is not provided")
     }
-
+    if(amount <= 99){
+      throw new Error("Invalid Amount, Minimum amount is 100");
+    }
     const wallet = await walletRepository.findOne(producer.username);
 
     if(!wallet){
@@ -223,8 +229,9 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
 
 export async function setWalletPin(walletPin: string, producer: Producer): Promise<Wallet>{
 
-  const wallet = await getWallet(producer.username);
-  wallet.pin = await encode(walletPin);
+  console.log(walletPin)
+  const wallet = await getProducerWallet(producer);
+  wallet.pin = await encode(walletPin);;
   walletRepository.update(wallet._id, wallet);
   return wallet;
 }
@@ -232,6 +239,10 @@ export async function setWalletPin(walletPin: string, producer: Producer): Promi
 export async function makePayment(producer: Producer, collectorUsername: string, amount: number, walletPin: string): Promise<any>{
 
 
+  if(amount <= 99){
+    throw new Error("Invalid Amount, Minimum amount is 100");
+  }
+  
   const collector: Collector = await getCollector(collectorUsername);
   const senderWallet = await walletRepository.findOne(producer.username);
   const receiverWallet = await walletRepository.findOne(collector.username);

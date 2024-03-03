@@ -463,7 +463,7 @@ const findCollector = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const {
       username,
-    } = await searchValidationSchema.validateAsync(req.body);
+    } = await searchValidationSchema.validateAsync(req.params.username);
 
     const foundCollector = await getCollector(username);
 
@@ -474,14 +474,14 @@ const findCollector = catchAsync(async (req: CustomRequest, res: Response) => {
 
     res.status(200).json({
       status: 'success',
-      message: "Producer found",
+      message: "Collector found",
       data: foundCollector,
     });
 
   } catch(error:any){
     res.status(error.status).json({
       status: 'failed',
-      message: 'An error occurred: ' + `${error}`,
+      message: `${error}`,
     })
   }
 })
