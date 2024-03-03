@@ -148,7 +148,7 @@ export async function verifyProducerDeposit(reference: string, producer: Produce
   checkWalletPin(walletPin, wallet.pin);
   await checkTransactionReference(reference);
   
-  const transaction = createTransaction(producer.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
+  const transaction = await createTransaction(producer.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
   wallet.balance = wallet.balance + data.data.amount;
   wallet.transactionHistory.push((await transaction));
   walletRepository.update(wallet._id, wallet);
@@ -172,7 +172,7 @@ const checkTransactionReference = async(reference: string): Promise<void> => {
   
 }
 
-function createTransaction(sender: string, receiver: string, reference: string, type: string, amount: number, date: string) {
+async function createTransaction(sender: string, receiver: string, reference: string, type: string, amount: number, date: string) {
   const transactionData: Partial<Transaction> = {
     sender: sender,
     type: type,
@@ -182,7 +182,7 @@ function createTransaction(sender: string, receiver: string, reference: string, 
     comment: type,
     date: date,
   };
-  const transaction = transactionRepository.create(transactionData);
+  const transaction = await transactionRepository.create(transactionData);
   return transaction;
 }
 
@@ -209,13 +209,14 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
     const data = await startWithdrawal(name, accountNumber, bank_code, amount);
     
     const withdrawData = await makeTransfer(amount, data.recipient_code);
+    console.log("i got here in make withdrawal")
+    await checkTransactionReference(withdrawData.data.reference);
 
-    checkTransactionReference(withdrawData.data.reference);
+    const transaction = await createTransaction("Bsync",producer.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount, withdrawData.data.create_at);
 
-    const transaction = createTransaction("Bsync",producer.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount, withdrawData.data.create_at);
-
+    console.log(" transaction created")
     wallet.balance = wallet.balance - withdrawData.data.amount;
-    wallet.transactionHistory.push((await transaction));
+    wallet.transactionHistory.push(transaction);
     walletRepository.update(wallet._id, wallet);
 
 
@@ -242,7 +243,7 @@ export async function makePayment(producer: Producer, collectorUsername: string,
   if(amount <= 99){
     throw new Error("Invalid Amount, Minimum amount is 100");
   }
-  
+
   const collector: Collector = await getCollector(collectorUsername);
   const senderWallet = await walletRepository.findOne(producer.username);
   const receiverWallet = await walletRepository.findOne(collector.username);
