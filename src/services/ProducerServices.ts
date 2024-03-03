@@ -229,7 +229,7 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
 export async function setWalletPin(walletPin: string, producer: Producer): Promise<Wallet>{
 
   const wallet = await getProducerWallet(producer);
-  if(!(wallet.pin === 'null')){
+  if(wallet.pin)){
     throw new Error("Failed!, Wallet Pin already set");
   }
 

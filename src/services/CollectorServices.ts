@@ -255,8 +255,8 @@ export async function getCollectorWallet(collector: Collector): Promise<Wallet>{
 export async function setWalletPin(walletPin: string, collector: Collector): Promise<Wallet>{
 
   const wallet = await getCollectorWallet(collector);
-  
-  if(!(wallet.pin === 'null')){
+
+  if(wallet.pin){
     throw new Error("Failed!, Wallet Pin already set");
   }
   wallet.pin = await encode(walletPin);
