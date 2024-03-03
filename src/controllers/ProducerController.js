@@ -97,13 +97,12 @@ const withdrawMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
         checkProducerIsProvided(req);
         const { amount, accountNumber, bank_code, name, walletPin, } = yield servicesValidationSchema_1.withdrawalValidationSchema.validateAsync(req.body);
         const response = yield (0, ProducerServices_1.makeWithdrawal)(name, accountNumber, bank_code, amount, req.producer, walletPin);
-        console.log(response);
         if (!response) {
             throw new Error(" An error occurred");
         }
         res.status(200).json({
             status: 'success',
-            message: "withdrawal process start, check your phone for otp",
+            message: "withdrawal Successful",
             data: response,
         });
     }
