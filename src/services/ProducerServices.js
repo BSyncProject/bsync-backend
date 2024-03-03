@@ -201,9 +201,7 @@ exports.makeWithdrawal = makeWithdrawal;
 function setWalletPin(walletPin, producer) {
     return __awaiter(this, void 0, void 0, function* () {
         const wallet = yield getProducerWallet(producer);
-        if (wallet.pin)
-            ;
-        {
+        if (wallet.pin) {
             throw new Error("Failed!, Wallet Pin already set");
         }
         wallet.pin = yield encode(walletPin);
