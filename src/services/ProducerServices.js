@@ -185,10 +185,8 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, producer, wallet
             }
             const data = yield (0, PaymentServices_1.startWithdrawal)(name, accountNumber, bank_code, amount);
             const withdrawData = yield (0, PaymentServices_1.makeTransfer)(amount, data.recipient_code);
-            console.log("i got here in make withdrawal");
             yield checkTransactionReference(withdrawData.data.reference);
             const transaction = yield createTransaction("Bsync", producer.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount, withdrawData.data.createdAt);
-            console.log(" transaction created");
             wallet.balance = wallet.balance - withdrawData.data.amount;
             wallet.transactionHistory.push(transaction);
             walletRepository.update(wallet._id, wallet);

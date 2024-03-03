@@ -182,14 +182,13 @@ const withdrawMoney = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const response = await makeWithdrawal(name, accountNumber, bank_code, amount, req.producer, walletPin);
 
-    console.log(response);
     if (!response) {
       throw new Error(" An error occurred")
     }
 
     res.status(200).json({
       status: 'success',
-      message: "withdrawal process start, check your phone for otp",
+      message: "withdrawal Successful",
       data: response,
     });
 
