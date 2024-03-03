@@ -212,7 +212,7 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
     console.log("i got here in make withdrawal")
     await checkTransactionReference(withdrawData.data.reference);
 
-    const transaction = await createTransaction("Bsync",producer.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount, withdrawData.data.create_at);
+    const transaction = await createTransaction("Bsync",producer.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount, withdrawData.data.createAt);
 
     console.log(" transaction created")
     wallet.balance = wallet.balance - withdrawData.data.amount;
