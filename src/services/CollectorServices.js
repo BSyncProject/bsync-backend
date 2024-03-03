@@ -88,6 +88,9 @@ const compare = (plainPassword, hashedPassword) => __awaiter(void 0, void 0, voi
 });
 function makeDeposit(amount, email) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (amount <= 99) {
+            throw new Error("Invalid Amount, Minimum amount is 100");
+        }
         const depositResponse = yield (0, PaymentServices_1.deposit)(amount, email);
         if (!depositResponse.data) {
             throw new Error("An error occurred, Try again later");
@@ -107,10 +110,10 @@ function verifyCollectorDeposit(reference, collector, walletPin) {
             throw new Error("Wallet not Found");
         }
         checkWalletPin(walletPin, wallet.pin);
-        checkTransactionReference(reference);
-        const transaction = createTransaction(collector.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
-        wallet.balance = wallet.balance += data.data.amount;
-        wallet.transactionHistory.push((yield transaction));
+        yield checkTransactionReference(reference);
+        const transaction = yield createTransaction(collector.username, "BSYNC", reference, "Deposit", data.data.amount / 100, data.data.paid_at);
+        wallet.balance = wallet.balance += (data.data.amount / 100);
+        wallet.transactionHistory.push(transaction);
         walletRepository.update(wallet._id, wallet);
         return data;
     });
@@ -122,21 +125,26 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, collector, walle
             if (!collector) {
                 throw new Error("Collector not provided");
             }
+            if (amount <= 99) {
+                throw new Error("Invalid Amount, Minimum amount is 100");
+            }
             const wallet = yield walletRepository.findOne(collector.username);
             if (!wallet) {
-                throw new Error('An error occurred');
+                throw new Error('Collector does not have a wallet');
             }
-            checkWalletPin(walletPin, wallet.pin);
+            yield checkWalletPin(walletPin, wallet.pin);
             if (wallet.balance < amount) {
                 throw new Error("Insufficient Fund");
             }
-            const withdrawData = yield (0, PaymentServices_1.startWithdrawal)(name, accountNumber, bank_code, amount);
+            const data = yield (0, PaymentServices_1.startWithdrawal)(name, accountNumber, bank_code, amount);
+            const withdrawData = yield (0, PaymentServices_1.makeTransfer)(amount, data.recipient_code);
+            yield checkTransactionReference(withdrawData.data.reference);
             if (!withdrawData) {
                 throw new Error("An Error occurred");
             }
-            checkTransactionReference(withdrawData.data.reference);
-            const transaction = createTransaction("Bsync", collector.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount, withdrawData.data.create_at);
-            wallet.balance = wallet.balance -= withdrawData.data.amount;
+            yield checkTransactionReference(withdrawData.data.reference);
+            const transaction = createTransaction("Bsync", collector.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount / 100, withdrawData.data.createdAt);
+            wallet.balance = wallet.balance - (withdrawData.data.amount / 100);
             wallet.transactionHistory.push((yield transaction));
             walletRepository.update(wallet._id, wallet);
             return withdrawData;
@@ -207,7 +215,10 @@ function getCollectorWallet(collector) {
 exports.getCollectorWallet = getCollectorWallet;
 function setWalletPin(walletPin, collector) {
     return __awaiter(this, void 0, void 0, function* () {
-        const wallet = yield getWallet(collector.username);
+        const wallet = yield getCollectorWallet(collector);
+        if (!(wallet.pin === 'null')) {
+            throw new Error("Failed!, Wallet Pin already set");
+        }
         wallet.pin = yield encode(walletPin);
         walletRepository.update(wallet._id, wallet);
         return wallet;
@@ -220,14 +231,14 @@ function becomeAgent(collector) {
             throw new Error("Collector not Provided");
         }
         collector.isAgent = true;
-        collectorRepository.update(collector._id, collector);
+        yield collectorRepository.update(collector._id, collector);
         return 'Collector is now an Agent';
     });
 }
 exports.becomeAgent = becomeAgent;
 function addPickerr(pickerData, collector) {
     return __awaiter(this, void 0, void 0, function* () {
-        collectIsAgent(collector);
+        yield collectIsAgent(collector);
         pickerData.collector = collector;
         const picker = yield pickerServices.addPicker(pickerData);
         return picker;

@@ -9,7 +9,8 @@ import { Picker } from '../models/Picker';
 import {
   deposit, 
   verifyDeposit, 
-  startWithdrawal, 
+  startWithdrawal,
+  makeTransfer, 
 } from './PaymentServices';
 import { Transaction } from '../models/Transaction';
 import TransactionRepository from '../repository/TransactionRepository';
@@ -95,6 +96,10 @@ const compare = async (plainPassword: string, hashedPassword: string): Promise<b
 
 export async function makeDeposit(amount: number, email: string): Promise<any>{
 
+  if(amount <= 99){
+    throw new Error("Invalid Amount, Minimum amount is 100");
+  }
+
   const depositResponse = await deposit(amount, email);
 
   if(!depositResponse.data){
@@ -119,10 +124,10 @@ export async function verifyCollectorDeposit(reference: string, collector: Colle
 
   checkWalletPin(walletPin, wallet.pin);
 
-  checkTransactionReference(reference);
-  const transaction = createTransaction(collector.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
-  wallet.balance = wallet.balance += data.data.amount;
-  wallet.transactionHistory.push((await transaction));
+  await checkTransactionReference(reference);
+  const transaction = await createTransaction(collector.username, "BSYNC", reference, "Deposit", data.data.amount/100, data.data.paid_at);
+  wallet.balance = wallet.balance += (data.data.amount/100);
+  wallet.transactionHistory.push(transaction);
   walletRepository.update(wallet._id, wallet);
 
   return data;
@@ -134,28 +139,34 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
     if(!collector){
       throw new Error("Collector not provided");
     }
+    if(amount <= 99){
+      throw new Error("Invalid Amount, Minimum amount is 100");
+    }
 
     const wallet = await walletRepository.findOne(collector.username);
     
-    if(!wallet){ throw new Error('An error occurred'); }
-    checkWalletPin(walletPin, wallet.pin);
+    if(!wallet){ throw new Error('Collector does not have a wallet'); }
+    await checkWalletPin(walletPin, wallet.pin);
 
 
     if(wallet.balance < amount){
       throw new Error("Insufficient Fund");
     }
     
-    const withdrawData = await startWithdrawal(name, accountNumber, bank_code, amount);
+    const data = await startWithdrawal(name, accountNumber, bank_code, amount);
+
+    const withdrawData = await makeTransfer(amount, data.recipient_code);
+    await checkTransactionReference(withdrawData.data.reference);
 
     if(!withdrawData){
       throw new Error("An Error occurred");
     }
   
-    checkTransactionReference(withdrawData.data.reference);
+    await checkTransactionReference(withdrawData.data.reference);
     
-    const transaction = createTransaction("Bsync",collector.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount, withdrawData.data.create_at);
+    const transaction = createTransaction("Bsync",collector.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount/100, withdrawData.data.createdAt);
   
-    wallet.balance = wallet.balance -= withdrawData.data.amount;
+    wallet.balance = wallet.balance - (withdrawData.data.amount / 100);
     wallet.transactionHistory.push((await transaction));
     walletRepository.update(wallet._id, wallet);
     
@@ -243,7 +254,11 @@ export async function getCollectorWallet(collector: Collector): Promise<Wallet>{
 
 export async function setWalletPin(walletPin: string, collector: Collector): Promise<Wallet>{
 
-  const wallet = await getWallet(collector.username);
+  const wallet = await getCollectorWallet(collector);
+  
+  if(!(wallet.pin === 'null')){
+    throw new Error("Failed!, Wallet Pin already set");
+  }
   wallet.pin = await encode(walletPin);
   walletRepository.update(wallet._id, wallet);
   return wallet;
@@ -256,15 +271,14 @@ export async function becomeAgent(collector: Collector): Promise<any>{
   }
 
   collector.isAgent = true;
-  collectorRepository.update(collector._id, collector);
-
+  await collectorRepository.update(collector._id, collector);
   return 'Collector is now an Agent';
 
 }
 
 export async function addPickerr(pickerData: any, collector: Collector): Promise<any>{
 
-  collectIsAgent(collector);
+  await collectIsAgent(collector);
   pickerData.collector = collector;
   const picker = await pickerServices.addPicker(pickerData);
   return picker;

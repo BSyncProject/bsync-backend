@@ -62,12 +62,12 @@ const collectorWithdrawal = catchAsync((req, res) => __awaiter(void 0, void 0, v
         }
         res.status(200).json({
             status: 'success',
-            message: "withdrawal process start, check your phone for otp",
+            message: "withdrawal Successful",
             data: response,
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -87,7 +87,7 @@ const collectorDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, void
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -107,7 +107,7 @@ const verifyCollDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, voi
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -128,7 +128,7 @@ const setPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, functi
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -153,7 +153,7 @@ const becomeAgentPermission = catchAsync((req, res) => __awaiter(void 0, void 0,
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -180,7 +180,7 @@ const addPicker = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fun
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -200,7 +200,7 @@ const deletePicker = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -227,7 +227,7 @@ const updatePicker = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -283,7 +283,7 @@ const makePaymentC = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: 'An error occurred: ' + `${error}`,
         });
@@ -304,7 +304,7 @@ const findCollector = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
         });
     }
     catch (error) {
-        res.status(error.status).json({
+        res.status(500).json({
             status: 'failed',
             message: `${error}`,
         });

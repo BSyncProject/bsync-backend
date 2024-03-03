@@ -148,9 +148,9 @@ export async function verifyProducerDeposit(reference: string, producer: Produce
   checkWalletPin(walletPin, wallet.pin);
   await checkTransactionReference(reference);
   
-  const transaction = await createTransaction(producer.username, "BSYNC", reference, "Deposit", data.data.amount, data.data.paid_at);
-  wallet.balance = wallet.balance + data.data.amount;
-  wallet.transactionHistory.push((await transaction));
+  const transaction = await createTransaction(producer.username, "BSYNC", reference, "Deposit", (data.data.amount/100), data.data.paid_at);
+  wallet.balance = wallet.balance + (data.data.amount/100);
+  wallet.transactionHistory.push(transaction);
   walletRepository.update(wallet._id, wallet);
 
   return data;
@@ -201,6 +201,7 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
     if(!wallet){
       throw new Error('Producer does not have a wallet');
     }
+
     checkWalletPin(walletPin, wallet.pin);
 
     if(wallet.balance < amount){
@@ -211,9 +212,9 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
     const withdrawData = await makeTransfer(amount, data.recipient_code);
     await checkTransactionReference(withdrawData.data.reference);
 
-    const transaction = await createTransaction("Bsync",producer.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount, withdrawData.data.createdAt);
+    const transaction = await createTransaction("Bsync",producer.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount/100, withdrawData.data.createdAt);
 
-    wallet.balance = wallet.balance - withdrawData.data.amount;
+    wallet.balance = wallet.balance - (withdrawData.data.amount / 100);
     wallet.transactionHistory.push(transaction);
     walletRepository.update(wallet._id, wallet);
 
@@ -227,9 +228,12 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
 
 export async function setWalletPin(walletPin: string, producer: Producer): Promise<Wallet>{
 
-  console.log(walletPin)
   const wallet = await getProducerWallet(producer);
-  wallet.pin = await encode(walletPin);;
+  if(!(wallet.pin === 'null')){
+    throw new Error("Failed!, Wallet Pin already set");
+  }
+
+  wallet.pin = await encode(walletPin);
   walletRepository.update(wallet._id, wallet);
   return wallet;
 }
