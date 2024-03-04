@@ -32,7 +32,7 @@ export const verifyDepositValidationSchema = Joi.object().keys({
 
 
 export const addPickerValidationSchema = Joi.object().keys({
-  name: Joi.number().required().min(3),
+  name: Joi.string().required().min(3),
   phoneNumber: Joi.string().required().min(8).max(14),
   address: Joi.string().required(),
   serviceArea: Joi.string().required(),
@@ -64,7 +64,7 @@ export const setPinValidationSchema = Joi.object().keys({
 export const makePaymentValidationSchema = Joi.object().keys({
   receiverUsername: Joi.string().required(),
   walletPin: Joi.string().required(),
-  amount: Joi.string().required(),
+  amount: Joi.number().required(),
 })
 
 

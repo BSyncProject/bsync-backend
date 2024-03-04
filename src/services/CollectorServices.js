@@ -247,7 +247,7 @@ function addPickerr(pickerData, collector) {
 exports.addPickerr = addPickerr;
 function collectIsAgent(collector) {
     if (!collector.isAgent) {
-        throw new Error("Collector cannot Perform this action, become an agent");
+        throw new Error("Collector cannot perform this action, become an agent");
     }
 }
 function deletePickerr(pickerNumber, collector) {
@@ -282,7 +282,7 @@ function checkOwnerShip(picker, collector) {
         if (resolvedPicker.collector === undefined) {
             throw new Error("Collector is not defined for the picker");
         }
-        if (resolvedPicker.collector !== collector) {
+        if (!resolvedPicker.collector._id.equals(collector._id)) {
             throw new Error("Collector is not authorized");
         }
     });

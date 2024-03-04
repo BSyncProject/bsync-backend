@@ -27,7 +27,7 @@ exports.verifyDepositValidationSchema = Joi.object().keys({
     walletPin: Joi.string().required()
 });
 exports.addPickerValidationSchema = Joi.object().keys({
-    name: Joi.number().required().min(3),
+    name: Joi.string().required().min(3),
     phoneNumber: Joi.string().required().min(8).max(14),
     address: Joi.string().required(),
     serviceArea: Joi.string().required(),
@@ -52,7 +52,7 @@ exports.setPinValidationSchema = Joi.object().keys({
 exports.makePaymentValidationSchema = Joi.object().keys({
     receiverUsername: Joi.string().required(),
     walletPin: Joi.string().required(),
-    amount: Joi.string().required(),
+    amount: Joi.number().required(),
 });
 exports.searchValidationSchema = Joi.object().keys({
     username: Joi.string().required(),
