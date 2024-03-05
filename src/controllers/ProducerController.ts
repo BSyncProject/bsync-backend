@@ -10,7 +10,9 @@ import {
   getProducerWallet,
   makePayment,
   setWalletPin,
-  getProducer,  
+  getProducer,
+  getAllP,
+  getMyWastes,  
 
  } from '../services/ProducerServices';
 import {signToken} from '../utils/tokenUtils'
@@ -29,6 +31,8 @@ import {
   setPinValidationSchema,
   makePaymentValidationSchema,
   searchValidationSchema,
+  getPickerValidationSchema,
+  wasteAvailabilityValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Producer } from '../models/Producer';
@@ -381,7 +385,63 @@ const findProducer = catchAsync(async (req: CustomRequest, res: Response) => {
   }
 })
 
+const getPickers = catchAsync(async (req: CustomRequest, res: Response) => {
 
+  try{
+
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const {
+      location,
+    } = await getPickerValidationSchema.validateAsync(req.params.location);
+
+    const foundPickers = await getAllP(location);
+
+
+    if (!foundPickers) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Pickers found",
+      data: foundPickers,
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
+const getWastes = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const foundPickers = await getMyWastes(producer);
+
+
+    if (!foundPickers) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Pickers found",
+      data: foundPickers,
+    });
+
+  } catch(error:any){
+    res.status(error.status).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
 
 
 
@@ -397,6 +457,8 @@ module.exports = {
   setPin,
   makePaymentP,
   findProducer,  
+  getPickers,
+  getWastes,
 };
 
 
