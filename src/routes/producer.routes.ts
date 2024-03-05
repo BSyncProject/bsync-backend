@@ -13,8 +13,8 @@ const {
   setPin,
   makePaymentP,
   findProducer,
-  getAvailableWaste,
-  getPickers
+  getWastes,
+  getPickers,
 } = require('../controllers/ProducerController');
 
 const {producerAuth} = require('../middleware/producerAuth');
@@ -33,8 +33,8 @@ router.get('/wallet', getWallet);
 router.post('/wallet/pin', setPin);
 router.post('/transfer', makePaymentP);
 router.get('/find/:username', findProducer);
-router.get('/wastes/:location', getAvailableWaste);
-router.get('/pickers', getPickers)
+router.get('/waste', getWastes);
+router.get('/pickers', getPickers);
 
 
 module.exports = router;

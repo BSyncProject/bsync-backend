@@ -236,6 +236,47 @@ const findProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
         });
     }
 }));
+const getPickers = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const producer = checkProducerIsProvided(req);
+        const { location, } = yield servicesValidationSchema_1.getPickerValidationSchema.validateAsync(req.params.location);
+        const foundPickers = yield (0, ProducerServices_1.getAllP)(location);
+        if (!foundPickers) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "Pickers found",
+            data: foundPickers,
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
+const getWastes = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const producer = checkProducerIsProvided(req);
+        const foundPickers = yield (0, ProducerServices_1.getMyWastes)(producer);
+        if (!foundPickers) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "Pickers found",
+            data: foundPickers,
+        });
+    }
+    catch (error) {
+        res.status(error.status).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
 module.exports = {
     signUpProducer,
     loginProducer,
@@ -248,4 +289,6 @@ module.exports = {
     setPin,
     makePaymentP,
     findProducer,
+    getPickers,
+    getWastes,
 };

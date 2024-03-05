@@ -1,3 +1,4 @@
+import { Producer } from '../models/Producer';
 import { Waste, WasteModel } from '../models/Waste'; // Assuming Waste model is defined
 
 class WasteRepository {
@@ -12,7 +13,12 @@ class WasteRepository {
     return wastes;
   }
 
-  async getAll(): Promise<Waste[]> {
+  async findWastesByProducer(producer: Producer): Promise<Waste[]> {
+    const wastes = await WasteModel.find({ producer: producer, isSold: false }).exec();
+    return wastes;
+  }
+
+async getAll(): Promise<Waste[]> {
     const allWastes = await WasteModel.find().populate('producer').exec();
     return allWastes;
   }

@@ -15,12 +15,15 @@ import {
 import { Transaction } from '../models/Transaction';
 import { Collector } from '../models/Collector';
 import { getCollector } from './CollectorServices';
+import { Picker } from '../models/Picker';
+import PickerRepository from '../repository/PickerRepository';
 
 
 const producerRepository = new ProducerRepository();
 const walletRepository = new WalletRepository();
 const wasteRepository = new WasteRepository();
 const transactionRepository = new TransactionRepository();
+const pickerRepository = new PickerRepository();
 
 
 export async function signUp(signUpData: Partial<Producer>): Promise<Producer> {
@@ -302,5 +305,18 @@ export async function getProducer(username: string): Promise<Producer> {
   }
   return producer;
 
+}
+
+export async function getAllP(location: string): Promise<Picker[]> {
+
+  const pickers = await pickerRepository.findByServiceArea(location);
+  return pickers;
+
+}
+
+export async function getMyWastes(producer: Producer): Promise<Waste[]> {
+
+  const wastes = await wasteRepository.findWastesByProducer(producer);
+  return wastes
 }
 

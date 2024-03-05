@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProducer = exports.getProducerWallet = exports.reportIssues = exports.makePayment = exports.setWalletPin = exports.makeWithdrawal = exports.verifyProducerDeposit = exports.makeDeposit = exports.deleteWaste = exports.postWaste = exports.login = exports.signUp = void 0;
+exports.getMyWastes = exports.getAllP = exports.getProducer = exports.getProducerWallet = exports.reportIssues = exports.makePayment = exports.setWalletPin = exports.makeWithdrawal = exports.verifyProducerDeposit = exports.makeDeposit = exports.deleteWaste = exports.postWaste = exports.login = exports.signUp = void 0;
 const _ProducerRepository_1 = __importDefault(require("../repository/ ProducerRepository"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -20,10 +20,12 @@ const WasteRepository_1 = __importDefault(require("../repository/WasteRepository
 const TransactionRepository_1 = __importDefault(require("../repository/TransactionRepository"));
 const PaymentServices_1 = require("./PaymentServices");
 const CollectorServices_1 = require("./CollectorServices");
+const PickerRepository_1 = __importDefault(require("../repository/PickerRepository"));
 const producerRepository = new _ProducerRepository_1.default();
 const walletRepository = new WalletRepository_1.default();
 const wasteRepository = new WasteRepository_1.default();
 const transactionRepository = new TransactionRepository_1.default();
+const pickerRepository = new PickerRepository_1.default();
 function signUp(signUpData) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!signUpData.password || !signUpData.username || !signUpData.email) {
@@ -262,3 +264,17 @@ function getProducer(username) {
     });
 }
 exports.getProducer = getProducer;
+function getAllP(location) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pickers = yield pickerRepository.findByServiceArea(location);
+        return pickers;
+    });
+}
+exports.getAllP = getAllP;
+function getMyWastes(producer) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const wastes = yield wasteRepository.findWastesByProducer(producer);
+        return wastes;
+    });
+}
+exports.getMyWastes = getMyWastes;
