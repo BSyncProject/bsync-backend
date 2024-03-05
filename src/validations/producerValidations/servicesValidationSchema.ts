@@ -57,6 +57,10 @@ export const wasteAvailabilityValidationSchema = Joi.object().keys({
   location: Joi.string().required(),
 })
 
+export const getPickerValidationSchema = Joi.object().keys({
+  location: Joi.string().required(),
+})
+
 export const setPinValidationSchema = Joi.object().keys({
   walletPin: Joi.string().required().length(4),
 });

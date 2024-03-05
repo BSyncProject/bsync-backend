@@ -13,6 +13,8 @@ const {
   setPin,
   makePaymentP,
   findProducer,
+  getAvailableWaste,
+  getPickers
 } = require('../controllers/ProducerController');
 
 const {producerAuth} = require('../middleware/producerAuth');
@@ -30,7 +32,9 @@ router.delete('./delete', deleteWastes);
 router.get('/wallet', getWallet);
 router.post('/wallet/pin', setPin);
 router.post('/transfer', makePaymentP);
-router.get('/find/:username', findProducer)
+router.get('/find/:username', findProducer);
+router.get('/wastes/:location', getAvailableWaste);
+router.get('/pickers', getPickers)
 
 
 module.exports = router;

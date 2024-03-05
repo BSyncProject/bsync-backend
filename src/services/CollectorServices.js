@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCollector = exports.getWastes = exports.updatePickerr = exports.deletePickerr = exports.addPickerr = exports.becomeAgent = exports.setWalletPin = exports.getCollectorWallet = exports.makePayment = exports.makeWithdrawal = exports.verifyCollectorDeposit = exports.makeDeposit = exports.login = exports.signUpCollector = void 0;
+exports.getCollectorPickers = exports.getAllPickers = exports.getCollector = exports.getWastes = exports.updatePickerr = exports.deletePickerr = exports.addPickerr = exports.becomeAgent = exports.setWalletPin = exports.getCollectorWallet = exports.makePayment = exports.makeWithdrawal = exports.verifyCollectorDeposit = exports.makeDeposit = exports.login = exports.signUpCollector = void 0;
 const CollectorRepository_1 = __importDefault(require("../repository/CollectorRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
@@ -307,3 +307,17 @@ function getCollector(username) {
     });
 }
 exports.getCollector = getCollector;
+function getAllPickers(location) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const picker = yield pickerServices.findByServiceArea(location);
+        return picker;
+    });
+}
+exports.getAllPickers = getAllPickers;
+function getCollectorPickers(collector) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pickers = yield pickerServices.findByCollector(collector);
+        return pickers;
+    });
+}
+exports.getCollectorPickers = getCollectorPickers;

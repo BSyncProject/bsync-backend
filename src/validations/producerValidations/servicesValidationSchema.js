@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchValidationSchema = exports.makePaymentValidationSchema = exports.setPinValidationSchema = exports.wasteAvailabilityValidationSchema = exports.finalizeWithdrawalValidationSchema = exports.updatePickerValidationSchema = exports.deletePickerValidationSchema = exports.addPickerValidationSchema = exports.verifyDepositValidationSchema = exports.depositValidationSchema = exports.deleteWasteValidationSchema = exports.withdrawalValidationSchema = exports.postWasteValidationSchema = void 0;
+exports.searchValidationSchema = exports.makePaymentValidationSchema = exports.setPinValidationSchema = exports.getPickerValidationSchema = exports.wasteAvailabilityValidationSchema = exports.finalizeWithdrawalValidationSchema = exports.updatePickerValidationSchema = exports.deletePickerValidationSchema = exports.addPickerValidationSchema = exports.verifyDepositValidationSchema = exports.depositValidationSchema = exports.deleteWasteValidationSchema = exports.withdrawalValidationSchema = exports.postWasteValidationSchema = void 0;
 const Joi = require('joi');
 exports.postWasteValidationSchema = Joi.object().keys({
     quantity: Joi.string().required(),
@@ -44,6 +44,9 @@ exports.finalizeWithdrawalValidationSchema = Joi.object().keys({
     transfer_code: Joi.string().required()
 });
 exports.wasteAvailabilityValidationSchema = Joi.object().keys({
+    location: Joi.string().required(),
+});
+exports.getPickerValidationSchema = Joi.object().keys({
     location: Joi.string().required(),
 });
 exports.setPinValidationSchema = Joi.object().keys({

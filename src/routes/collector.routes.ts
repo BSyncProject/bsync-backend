@@ -18,6 +18,7 @@ const {
   setPin,
   makePaymentC,
   findCollector,
+  collectorPickers,
 
 } = require('../controllers/CollectorController');
 
@@ -38,5 +39,6 @@ router.get('/waste/:location', getAvailableWaste);
 router.post('/transfer', makePaymentC);
 router.post('/wallet/pin', setPin);
 router.get('/find/:username', findCollector);
+router.get('/all-pickers', collectorPickers)
 
 module.exports = router;
