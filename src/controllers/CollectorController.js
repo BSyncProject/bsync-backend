@@ -268,6 +268,24 @@ const getAvailableWaste = catchAsync((req, res) => __awaiter(void 0, void 0, voi
         });
     }
 }));
+const getPickers = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const { location } = yield servicesValidationSchema_1.getPickerValidationSchema.validateAsync(req.params.location);
+        const listOfAllPicker = yield (0, CollectorServices_1.getAllPickers)(location);
+        res.status(200).json({
+            status: 'success',
+            message: "all pickers list",
+            data: listOfAllPicker,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: 'An error occurred: ' + `${error}`,
+        });
+    }
+}));
 const makePaymentC = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const collector = checkCollectorIsProvided(req);
@@ -310,6 +328,26 @@ const findCollector = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
         });
     }
 }));
+const collectorPickers = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const foundCollector = yield (0, CollectorServices_1.getCollectorPickers)(collector);
+        if (!foundCollector) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "Collector found",
+            data: foundCollector,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: `${error}`,
+        });
+    }
+}));
 module.exports = {
     signUp,
     loginCollector,
@@ -325,4 +363,6 @@ module.exports = {
     setPin,
     makePaymentC,
     findCollector,
+    getPickers,
+    collectorPickers,
 };

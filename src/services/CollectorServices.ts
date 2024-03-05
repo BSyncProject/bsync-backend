@@ -353,3 +353,18 @@ export async function getCollector(username: string): Promise<Collector> {
   return collector;
 
 }
+
+export async function getAllPickers(location: string): Promise<Picker[]> {
+
+  const picker: Picker[] = await pickerServices.findByServiceArea(location);
+  return picker;
+
+}
+
+export async function getCollectorPickers(collector: Collector) {
+
+  const pickers: Picker[] = await pickerServices.findByCollector(collector);
+  return pickers;
+
+  
+}

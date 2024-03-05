@@ -11,6 +11,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const Picker_1 = require("../models/Picker"); // Assuming Picker model is defined
 class PickerRepository {
+    findByCollector(collector) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const foundPickers = yield Picker_1.PickerModel.find({ collector: collector }).exec();
+            return foundPickers;
+        });
+    }
     create(pickerData) {
         return __awaiter(this, void 0, void 0, function* () {
             const newPicker = yield Picker_1.PickerModel.create(pickerData);
@@ -44,6 +50,11 @@ class PickerRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const foundCollector = yield Picker_1.PickerModel.findOne({ phoneNumber: phoneNumber });
             return foundCollector;
+        });
+    }
+    findByServiceArea(location) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield Picker_1.PickerModel.find({ serviceArea: location }).exec();
         });
     }
 }

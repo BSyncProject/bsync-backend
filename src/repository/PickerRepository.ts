@@ -1,6 +1,13 @@
+import { Collector } from '../models/Collector';
 import { Picker, PickerModel } from '../models/Picker'; // Assuming Picker model is defined
 
 class PickerRepository {
+
+  async findByCollector(collector: Collector): Promise<Picker[]> {
+    const foundPickers = await PickerModel.find({ collector: collector }).exec()
+    return foundPickers;
+}
+
   async create(pickerData: Partial<Picker>): Promise<Picker> {
     const newPicker = await PickerModel.create(pickerData);
     return newPicker;
@@ -28,6 +35,10 @@ class PickerRepository {
   async findOne(phoneNumber: string): Promise<Picker | null>{
     const foundCollector: Picker | null =  await PickerModel.findOne({phoneNumber: phoneNumber});
     return foundCollector;
+  }
+
+  async findByServiceArea(location: string): Promise<Picker[]> {
+    return await PickerModel.find({ serviceArea: location }).exec();
   }
 
 }

@@ -14,6 +14,8 @@ import {
   setWalletPin,
   makePayment,
   getCollector,
+  getAllPickers,
+  getCollectorPickers,
 
 } from '../services/CollectorServices'; 
 import {signToken} from '../utils/tokenUtils'
@@ -34,6 +36,7 @@ import {
   setPinValidationSchema,
   makePaymentValidationSchema,
   searchValidationSchema,
+  getPickerValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Collector } from '../models/Collector';
@@ -422,6 +425,30 @@ const getAvailableWaste = catchAsync(async (req: CustomRequest, res: Response) =
   }
 })
 
+const getPickers = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+    
+    const collector: Collector = checkCollectorIsProvided(req);
+    
+    const { location } = await getPickerValidationSchema.validateAsync(req.params.location);
+
+    const listOfAllPicker = await getAllPickers(location);
+
+    res.status(200).json({
+      status: 'success',
+      message: "all pickers list",
+      data: listOfAllPicker,
+    });
+
+  } catch(error:any){
+    res.status(500).json({
+      status: 'failed',
+      message: 'An error occurred: ' + `${error}`,
+    })
+  }
+})
+
 const makePaymentC = catchAsync(async (req: CustomRequest, res: Response) => {
 
   try{
@@ -487,6 +514,33 @@ const findCollector = catchAsync(async (req: CustomRequest, res: Response) => {
 
 
 
+const collectorPickers = catchAsync(async (req: CustomRequest, res: Response) => {
+
+  try{
+
+    const collector: Collector = checkCollectorIsProvided(req);
+
+    const foundCollector = await getCollectorPickers(collector);
+
+
+    if (!foundCollector) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Collector found",
+      data: foundCollector,
+    });
+
+  } catch(error:any){
+    res.status(500).json({
+      status: 'failed',
+      message: `${error}`,
+    })
+  }
+})
+
 module.exports = {
   signUp,
   loginCollector,
@@ -502,4 +556,7 @@ module.exports = {
   setPin,
   makePaymentC,
   findCollector,
+  getPickers,
+  collectorPickers,
+  
 }

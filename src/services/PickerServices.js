@@ -42,5 +42,23 @@ class PickerServices {
             return foundPicker;
         });
     }
+    findByServiceArea(location) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const pickers = yield pickerRepository.findByServiceArea(location);
+            if (!pickers) {
+                throw new Error(" No user in this area found");
+            }
+            return pickers;
+        });
+    }
+    findByCollector(collector) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const pickers = yield pickerRepository.findByCollector(collector);
+            if (!pickers) {
+                throw new Error("No picker found");
+            }
+            return pickers;
+        });
+    }
 }
 exports.default = PickerServices;
