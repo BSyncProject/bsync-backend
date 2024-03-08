@@ -12,6 +12,11 @@ class CollectorRepository {
     return foundCollector;
   }
 
+  async findUserByEmail(email: string){
+    const foundCollector =  CollectorModel.findOne({email: email});
+    return foundCollector;
+  }
+
   async check(username: string, email: string){
 
     const collector = await this.findOne(username);

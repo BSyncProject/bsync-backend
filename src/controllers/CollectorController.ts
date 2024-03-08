@@ -37,12 +37,17 @@ import {
   makePaymentValidationSchema,
   searchValidationSchema,
   getPickerValidationSchema,
+  forgotPasswordValidationSchema,
+  checkUsernameValidationSchema,
+  resetPasswordValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Collector } from '../models/Collector';
 import { Picker } from '../models/Picker';
+import UserService from '../services/UserServices';
 
 const catchAsync = require('../utils/catchAsync');
+const userService = new UserService();
 
 const signUp = catchAsync(async (req: Request, res: Response) => {
   try {
@@ -541,6 +546,69 @@ const collectorPickers = catchAsync(async (req: CustomRequest, res: Response) =>
   }
 })
 
+const forgotPassword = catchAsync(async(req: Request, res: Response) => {
+
+  try{
+
+    const {
+      email,
+    } = await forgotPasswordValidationSchema.validateAsync(req.body);
+    const response = await userService.forgotPassword(email, "collector");
+
+
+    if (!response) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Check your email for password reset otp",
+    });
+
+  } catch(error:any){
+    res.status(500).json({
+      status: 'failed',
+      message: `${error}`,
+    })
+  }
+})
+
+const checkUsername = catchAsync(async(req: Request, res: Response) => {
+
+  const {
+    username,
+  } = await checkUsernameValidationSchema.validateAsync(req.body);
+  const response = await userService.checkUsername(username, 'collector');
+
+  if (!response) {
+    throw new Error(" An error occurred")
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: response,
+  });
+  
+})
+
+const resetPassword = catchAsync(async(req: Request, res: Response) => {
+
+  const {
+    token, email, newPassword,
+  } = await resetPasswordValidationSchema.validateAsync(req.body);
+  const response = await userService.resetPassword(email, token, newPassword, 'collector', );
+
+  if (!response) {
+    throw new Error(" An error occurred")
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: "Password reset successful",
+  });
+  
+})
+
 module.exports = {
   signUp,
   loginCollector,
@@ -558,5 +626,8 @@ module.exports = {
   findCollector,
   getPickers,
   collectorPickers,
+  forgotPassword,
+  checkUsername,
+  resetPassword,
   
 }

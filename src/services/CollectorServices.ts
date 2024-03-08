@@ -1,7 +1,6 @@
 import { Collector} from '../models/Collector'; 
 import { Wallet } from '../models/Wallet';
 import CollectorRepository from '../repository/CollectorRepository';
-
 import bcrypt from 'bcrypt';
 import WalletRepository from '../repository/WalletRepository';
 import PickerServices from '../services/PickerServices'
@@ -368,3 +367,8 @@ export async function getCollectorPickers(collector: Collector) {
 
   
 }
+
+
+
+
+

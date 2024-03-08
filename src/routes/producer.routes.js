@@ -5,10 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
-const { signUpProducer, loginProducer, postPWaste, deleteWastes, depositMoney, withdrawMoney, verifyDeposit, getWallet, setPin, makePaymentP, findProducer, getWastes, getPickers, } = require('../controllers/ProducerController');
+const { signUpProducer, loginProducer, postPWaste, deleteWastes, depositMoney, withdrawMoney, verifyDeposit, getWallet, setPin, makePaymentP, findProducer, getWastes, getPickers, checkUsername, forgotPassword, resetPassword } = require('../controllers/ProducerController');
 const { producerAuth } = require('../middleware/producerAuth');
 router.post('/signup', signUpProducer);
 router.post('/login', loginProducer);
+router.post('/checkUsername', checkUsername);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 router.use(producerAuth);
 router.post('/waste', postPWaste);
 router.post('/withdrawal', withdrawMoney);

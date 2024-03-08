@@ -8,12 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const ProducerServices_1 = require("../services/ProducerServices");
 const tokenUtils_1 = require("../utils/tokenUtils");
 const AuthValidations_1 = require("../validations/producerValidations/AuthValidations");
 const servicesValidationSchema_1 = require("../validations/producerValidations/servicesValidationSchema");
+const UserServices_1 = __importDefault(require("../services/UserServices"));
 const catchAsync = require('../utils/catchAsync');
+const userService = new UserServices_1.default();
 const signUpProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { username, password, email, phoneNumber, name, address, wallet } = yield AuthValidations_1.signupProducerValidationSchema.validateAsync(req.body);
@@ -277,6 +282,47 @@ const getWastes = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fun
         });
     }
 }));
+const checkUsername = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { username, } = yield servicesValidationSchema_1.checkUsernameValidationSchema.validateAsync(req.body);
+    const response = yield userService.checkUsername(username, 'producer');
+    if (!response) {
+        throw new Error(" An error occurred");
+    }
+    res.status(200).json({
+        status: 'success',
+        message: response,
+    });
+}));
+const forgotPassword = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email, } = yield servicesValidationSchema_1.forgotPasswordValidationSchema.validateAsync(req.body);
+        const response = yield userService.forgotPassword(email, "producer");
+        if (!response) {
+            throw new Error(" An error occurred");
+        }
+        res.status(200).json({
+            status: 'success',
+            message: "Check your email for password reset otp",
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: `${error}`,
+        });
+    }
+}));
+const resetPassword = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { token, email, newPassword, } = yield servicesValidationSchema_1.resetPasswordValidationSchema.validateAsync(req.body);
+    const response = yield userService.resetPassword(email, token, newPassword, 'producer');
+    if (!response) {
+        throw new Error(" An error occurred");
+    }
+    res.status(200).json({
+        status: 'success',
+        message: "Password reset successful",
+    });
+}));
 module.exports = {
     signUpProducer,
     loginProducer,
@@ -291,4 +337,7 @@ module.exports = {
     findProducer,
     getPickers,
     getWastes,
+    forgotPassword,
+    checkUsername,
+    resetPassword
 };

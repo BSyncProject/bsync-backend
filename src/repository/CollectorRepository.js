@@ -23,6 +23,12 @@ class CollectorRepository {
             return foundCollector;
         });
     }
+    findUserByEmail(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const foundCollector = Collector_1.CollectorModel.findOne({ email: email });
+            return foundCollector;
+        });
+    }
     check(username, email) {
         return __awaiter(this, void 0, void 0, function* () {
             const collector = yield this.findOne(username);

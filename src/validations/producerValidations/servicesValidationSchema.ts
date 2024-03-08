@@ -75,3 +75,19 @@ export const makePaymentValidationSchema = Joi.object().keys({
 export const searchValidationSchema = Joi.object().keys({
   username: Joi.string().required(),
 })
+
+
+export const forgotPasswordValidationSchema = Joi.object().keys({
+  email: Joi.string().required(),
+})
+
+
+export const checkUsernameValidationSchema = Joi.object().keys({
+  username: Joi.string().required(),
+})
+
+export const resetPasswordValidationSchema = Joi.object().keys({
+  token: Joi.string().required(),
+  email: Joi.string().required(),
+  newPassword: Joi.string().required(),
+})
