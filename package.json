@@ -27,6 +27,12 @@
   "@types/bcrypt": "^5.0.2",
   
     
+  "@types/node": "^20.11.25",
+  
+    
+  "@types/uuid": "^9.0.8",
+  
+    
   "bcrypt": "^5.1.1",
   
     
@@ -48,7 +54,13 @@
   "jsonwebtoken": "^9.0.2",
   
     
-  "mongoose": "^8.2.0"
+  "mongoose": "^8.2.0",
+  
+    
+  "nodemailer": "^6.9.11",
+  
+    
+  "uuid": "^9.0.1"
   
   },
   
