@@ -32,12 +32,16 @@ import {
   makePaymentValidationSchema,
   searchValidationSchema,
   getPickerValidationSchema,
-  wasteAvailabilityValidationSchema,
+  checkUsernameValidationSchema,
+  forgotPasswordValidationSchema,
+  resetPasswordValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Producer } from '../models/Producer';
+import UserService from '../services/UserServices';
 
 const catchAsync = require('../utils/catchAsync');
+const userService = new UserService();
 
 
 const signUpProducer = catchAsync(async (req: Request, res: Response) => {
@@ -443,6 +447,69 @@ const getWastes = catchAsync(async (req: CustomRequest, res: Response) => {
   }
 })
 
+const checkUsername = catchAsync(async(req: Request, res: Response) => {
+
+  const {
+    username,
+  } = await checkUsernameValidationSchema.validateAsync(req.body);
+  const response = await userService.checkUsername(username, 'producer');
+
+  if (!response) {
+    throw new Error(" An error occurred")
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: response,
+  });
+
+})
+
+const forgotPassword = catchAsync(async(req: Request, res: Response) => {
+
+  try{
+
+    const {
+      email,
+    } = await forgotPasswordValidationSchema.validateAsync(req.body);
+    const response = await userService.forgotPassword(email, "producer");
+
+
+    if (!response) {
+      throw new Error(" An error occurred")
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: "Check your email for password reset otp",
+    });
+
+  } catch(error:any){
+    res.status(500).json({
+      status: 'failed',
+      message: `${error}`,
+    })
+  }
+})
+
+const resetPassword = catchAsync(async(req: Request, res: Response) => {
+
+  const {
+    token, email, newPassword,
+  } = await resetPasswordValidationSchema.validateAsync(req.body);
+  const response = await userService.resetPassword(email, token, newPassword, 'producer', );
+
+  if (!response) {
+    throw new Error(" An error occurred")
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: "Password reset successful",
+  });
+  
+})
+
 
 
 module.exports = {
@@ -459,6 +526,9 @@ module.exports = {
   findProducer,  
   getPickers,
   getWastes,
+  forgotPassword,
+  checkUsername,
+  resetPassword
 };
 
 

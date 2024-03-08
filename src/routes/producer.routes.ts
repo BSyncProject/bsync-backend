@@ -15,6 +15,9 @@ const {
   findProducer,
   getWastes,
   getPickers,
+  checkUsername,
+  forgotPassword,
+  resetPassword
 } = require('../controllers/ProducerController');
 
 const {producerAuth} = require('../middleware/producerAuth');
@@ -22,6 +25,9 @@ const {producerAuth} = require('../middleware/producerAuth');
 
 router.post('/signup', signUpProducer);
 router.post('/login', loginProducer);
+router.post('/checkUsername', checkUsername);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 router.use(producerAuth);
 router.post('/waste', postPWaste);

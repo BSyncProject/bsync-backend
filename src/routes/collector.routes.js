@@ -2,9 +2,12 @@
 const { collectorAuth } = require('../middleware/collectorAuth');
 const express = require('express');
 const router = express.Router();
-const { signUp, loginCollector, collectorWithdrawal, collectorDeposit, verifyCollDeposit, becomeAgentPermission, addPicker, deletePicker, updatePicker, getWallet, getAvailableWaste, setPin, makePaymentC, findCollector, collectorPickers, } = require('../controllers/CollectorController');
+const { signUp, loginCollector, collectorWithdrawal, collectorDeposit, verifyCollDeposit, becomeAgentPermission, addPicker, deletePicker, updatePicker, getWallet, getAvailableWaste, setPin, makePaymentC, findCollector, collectorPickers, forgotPassword, checkUsername, resetPassword, } = require('../controllers/CollectorController');
 router.post('/signup', signUp);
 router.post('/login', loginCollector);
+router.post('/checkUsername', checkUsername);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 router.use(collectorAuth);
 router.post('/withdrawal', collectorWithdrawal);
 router.post('/deposit', collectorDeposit);
@@ -19,4 +22,7 @@ router.post('/transfer', makePaymentC);
 router.post('/wallet/pin', setPin);
 router.get('/find/:username', findCollector);
 router.get('/all-pickers', collectorPickers);
+// router.post('/wallet/update', updateWalletPin); // oldpassword //newpassword
+// router.post('/wallet/resetPin', resetWalletPin);
+// router.post('wallet/forgotPin', forgotWalletPin);
 module.exports = router;
