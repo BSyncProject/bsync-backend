@@ -12,7 +12,6 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -23,6 +22,7 @@ app.use('/api/producer', producerRouter);
 app.use(cors({
   origin: '*', 
   methods: ['GET','HEAD','PUT','PATCH','POST','DELETE'],
+  allowedHeaders: ['Content-Type'], 
   credentials: true,            
 }));
 

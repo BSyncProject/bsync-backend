@@ -17,13 +17,14 @@ import { Producer } from '../models/Producer';
 import WasteRepository from '../repository/WasteRepository';
 import { Waste } from '../models/Waste';
 import { getProducer } from './ProducerServices';
+import EmailServices from './EmailServices';
 
 const collectorRepository = new CollectorRepository();
 const walletRepository = new WalletRepository();
 const pickerServices  = new PickerServices();
 const transactionRepository = new TransactionRepository();
 const wasteRepository = new WasteRepository();
-
+const emailService = new EmailServices();
 export async function signUpCollector(signUpData: Partial<Collector>): Promise<Collector> {
 
   if(!signUpData.password || !signUpData.username || !signUpData.email){
@@ -37,8 +38,9 @@ export async function signUpCollector(signUpData: Partial<Collector>): Promise<C
 
   signUpData.password = await encode(signUpData.password);
   signUpData.wallet = await createNewWallet(signUpData.username);
-
+  
   const newCollector = await collectorRepository.create(signUpData);
+  emailService.sendNewAccountEmail(newCollector.email, newCollector.name);
   return newCollector;
   
 }
