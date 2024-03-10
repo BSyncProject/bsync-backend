@@ -91,3 +91,9 @@ export const resetPasswordValidationSchema = Joi.object().keys({
   email: Joi.string().required(),
   newPassword: Joi.string().required(),
 })
+
+
+export const updateWalletPinValidationSchema = Joi.object().keys({
+  oldPin: Joi.string().required(),
+  newPin: Joi.string().required(),
+})

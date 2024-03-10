@@ -17,6 +17,7 @@ import { Collector } from '../models/Collector';
 import { getCollector } from './CollectorServices';
 import { Picker } from '../models/Picker';
 import PickerRepository from '../repository/PickerRepository';
+import EmailServices from './EmailServices';
 
 
 const producerRepository = new ProducerRepository();
@@ -24,6 +25,7 @@ const walletRepository = new WalletRepository();
 const wasteRepository = new WasteRepository();
 const transactionRepository = new TransactionRepository();
 const pickerRepository = new PickerRepository();
+const emailService = new EmailServices();
 
 
 export async function signUp(signUpData: Partial<Producer>): Promise<Producer> {
@@ -42,6 +44,7 @@ export async function signUp(signUpData: Partial<Producer>): Promise<Producer> {
   signUpData.wallet = await createNewWallet(signUpData.username)
 
   const newProducer = await producerRepository.create(signUpData);
+  const response = await emailService.sendNewAccountEmail(newProducer.email, newProducer.name);
   return newProducer;
   
 }
@@ -320,3 +323,20 @@ export async function getMyWastes(producer: Producer): Promise<Waste[]> {
   return wastes
 }
 
+export async function updateProducerWalletPin(producer: Producer, oldPin: string, newPin: string){
+  const wallet = await getProducerWallet(producer);
+  
+  if(wallet.pin !== oldPin){
+    throw new Error("Failed Incorrect Pin");
+  }
+
+  wallet.pin = newPin;
+  const response= walletRepository.update(wallet.id, wallet);
+
+  if(!response){
+    throw new Error("An error Occurred, try again Later");
+
+  }
+
+  return "Wallet pin updated Successfully";
+}
