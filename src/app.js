@@ -20,6 +20,7 @@ app.use('/api/producer', producerRouter);
 app.use((0, cors_1.default)({
     origin: '*',
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    allowedHeaders: ['Content-Type'],
     credentials: true,
 }));
 app.use((err, req, res, next) => {

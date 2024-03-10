@@ -21,11 +21,13 @@ const PaymentServices_1 = require("./PaymentServices");
 const TransactionRepository_1 = __importDefault(require("../repository/TransactionRepository"));
 const WasteRepository_1 = __importDefault(require("../repository/WasteRepository"));
 const ProducerServices_1 = require("./ProducerServices");
+const EmailServices_1 = __importDefault(require("./EmailServices"));
 const collectorRepository = new CollectorRepository_1.default();
 const walletRepository = new WalletRepository_1.default();
 const pickerServices = new PickerServices_1.default();
 const transactionRepository = new TransactionRepository_1.default();
 const wasteRepository = new WasteRepository_1.default();
+const emailService = new EmailServices_1.default();
 function signUpCollector(signUpData) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!signUpData.password || !signUpData.username || !signUpData.email) {
@@ -38,6 +40,7 @@ function signUpCollector(signUpData) {
         signUpData.password = yield encode(signUpData.password);
         signUpData.wallet = yield createNewWallet(signUpData.username);
         const newCollector = yield collectorRepository.create(signUpData);
+        emailService.sendNewAccountEmail(newCollector.email, newCollector.name);
         return newCollector;
     });
 }

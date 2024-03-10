@@ -86,7 +86,10 @@ class EmailServices {
         </html>
         `,
             };
-            const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'emails service';
+            const emailServiceUrl = process.env.EMAIL_SERVICE_URL;
+            if (!emailServiceUrl) {
+                throw new Error('EMAIL_SERVICE_URL environment variable is not set');
+            }
             const emailResponse = yield fetch(emailServiceUrl, {
                 method: 'POST',
                 headers: {
@@ -97,9 +100,6 @@ class EmailServices {
                 body: JSON.stringify(payload)
             })
                 .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to send email');
-                }
                 return response.json();
             }).catch(error => {
                 throw new Error(error.message);
