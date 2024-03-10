@@ -13,6 +13,7 @@ import {
   getProducer,
   getAllP,
   getMyWastes,  
+  updateProducerWalletPin,
 
  } from '../services/ProducerServices';
 import {signToken} from '../utils/tokenUtils'
@@ -35,6 +36,7 @@ import {
   checkUsernameValidationSchema,
   forgotPasswordValidationSchema,
   resetPasswordValidationSchema,
+  updatePickerValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Producer } from '../models/Producer';
@@ -511,6 +513,33 @@ const resetPassword = catchAsync(async(req: Request, res: Response) => {
 })
 
 
+const updateWalletPin = catchAsync(async(req: CustomRequest, res: Response) => {
+  
+  try{
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const {
+      oldPin, newPin,
+    } = await updatePickerValidationSchema.validateAsync(req.body);
+  
+    const response = await updateProducerWalletPin(producer, oldPin, newPin);
+  
+    if(!response) {throw new Error("An error occurred");}
+  
+    res.status(200).json({
+      status: "success",
+      message: response,
+    })
+  } catch(error: any){
+    res.status(500).json({
+      status: "failed",
+      message: `${error.message}`,
+    })
+  }
+  
+})
+
+
 
 module.exports = {
   signUpProducer,
@@ -528,7 +557,10 @@ module.exports = {
   getWastes,
   forgotPassword,
   checkUsername,
-  resetPassword
+  resetPassword,
+  updateWalletPin,
+
+
 };
 
 

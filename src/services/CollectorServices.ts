@@ -370,6 +370,24 @@ export async function getCollectorPickers(collector: Collector) {
   
 }
 
+export async function updateControllerWalletPin(collector: Collector, oldPin: string, newPin: string){
+  const wallet = await getCollectorWallet(collector);
+  
+  if(wallet.pin !== oldPin){
+    throw new Error("Failed Incorrect Pin");
+  }
+
+  wallet.pin = newPin;
+  const response= walletRepository.update(wallet.id, wallet);
+
+  if(!response){
+    throw new Error("An error Occurred, try again Later");
+
+  }
+
+  return "Wallet pin updated Successfully";
+}
+
 
 
 

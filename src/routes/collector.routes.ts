@@ -22,6 +22,7 @@ const {
   forgotPassword,
   checkUsername,
   resetPassword,
+  updateWalletPin,
 
 } = require('../controllers/CollectorController');
 
@@ -46,7 +47,7 @@ router.post('/transfer', makePaymentC);
 router.post('/wallet/pin', setPin);
 router.get('/find/:username', findCollector);
 router.get('/all-pickers', collectorPickers);
-// router.post('/wallet/update', updateWalletPin);
+router.post('/wallet/update-pin', updateWalletPin);
 // router.post('/wallet/resetPin', resetWalletPin);
 // router.post('wallet/forgotPin', forgotWalletPin);
 
