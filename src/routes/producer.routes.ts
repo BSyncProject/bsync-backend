@@ -18,7 +18,10 @@ const {
   checkUsername,
   forgotPassword,
   resetPassword,
-  updateWalletPin
+  updateWalletPin,
+  resetWalletPin,
+  forgotWalletPin,
+
 } = require('../controllers/ProducerController');
 
 const {producerAuth} = require('../middleware/producerAuth');
@@ -43,8 +46,8 @@ router.get('/find/:username', findProducer);
 router.get('/waste', getWastes);
 router.get('/pickers', getPickers);
 router.post('/wallet/update', updateWalletPin);
-// router.post('/wallet/resetPin', resetWalletPin);
-// router.post('wallet/forgotPin', forgotWalletPin);
+router.post('/wallet/resetPin', resetWalletPin);
+router.post('wallet/forgotPin', forgotWalletPin);
 
 
 module.exports = router;

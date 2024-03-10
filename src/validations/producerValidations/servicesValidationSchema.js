@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetPasswordValidationSchema = exports.checkUsernameValidationSchema = exports.forgotPasswordValidationSchema = exports.searchValidationSchema = exports.makePaymentValidationSchema = exports.setPinValidationSchema = exports.getPickerValidationSchema = exports.wasteAvailabilityValidationSchema = exports.finalizeWithdrawalValidationSchema = exports.updatePickerValidationSchema = exports.deletePickerValidationSchema = exports.addPickerValidationSchema = exports.verifyDepositValidationSchema = exports.depositValidationSchema = exports.deleteWasteValidationSchema = exports.withdrawalValidationSchema = exports.postWasteValidationSchema = void 0;
+exports.resetWalletPinValidationSchema = exports.updateWalletPinValidationSchema = exports.resetPasswordValidationSchema = exports.checkUsernameValidationSchema = exports.forgotPasswordValidationSchema = exports.searchValidationSchema = exports.makePaymentValidationSchema = exports.setPinValidationSchema = exports.getPickerValidationSchema = exports.wasteAvailabilityValidationSchema = exports.finalizeWithdrawalValidationSchema = exports.updatePickerValidationSchema = exports.deletePickerValidationSchema = exports.addPickerValidationSchema = exports.verifyDepositValidationSchema = exports.depositValidationSchema = exports.deleteWasteValidationSchema = exports.withdrawalValidationSchema = exports.postWasteValidationSchema = void 0;
 const Joi = require('joi');
 exports.postWasteValidationSchema = Joi.object().keys({
     quantity: Joi.string().required(),
@@ -70,4 +70,12 @@ exports.resetPasswordValidationSchema = Joi.object().keys({
     token: Joi.string().required(),
     email: Joi.string().required(),
     newPassword: Joi.string().required(),
+});
+exports.updateWalletPinValidationSchema = Joi.object().keys({
+    oldPin: Joi.string().required(),
+    newPin: Joi.string().required(),
+});
+exports.resetWalletPinValidationSchema = Joi.object().keys({
+    token: Joi.string().required(),
+    newPin: Joi.string().required(),
 });

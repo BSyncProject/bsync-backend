@@ -97,3 +97,9 @@ export const updateWalletPinValidationSchema = Joi.object().keys({
   oldPin: Joi.string().required(),
   newPin: Joi.string().required(),
 })
+
+export const resetWalletPinValidationSchema = Joi.object().keys({
+  token: Joi.string().required(),
+  newPin: Joi.string().required(),
+})
+

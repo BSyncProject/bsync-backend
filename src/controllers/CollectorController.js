@@ -394,6 +394,65 @@ const resetPassword = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
         message: "Password reset successful",
     });
 }));
+const updateWalletPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const { oldPin, newPin, } = yield servicesValidationSchema_1.updatePickerValidationSchema.validateAsync(req.body);
+        const response = yield (0, CollectorServices_1.updateControllerWalletPin)(collector, oldPin, newPin);
+        if (!response) {
+            throw new Error("An error occurred");
+        }
+        res.status(200).json({
+            status: "success",
+            message: response,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: "failed",
+            message: `${error.message}`,
+        });
+    }
+}));
+const forgotWalletPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const response = yield (0, CollectorServices_1.forgotWalletPinCollector)(collector);
+        if (!response) {
+            throw new Error("An error occurred");
+        }
+        res.status(200).json({
+            status: "success",
+            message: "Check your email for a wallet reset token",
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: `${error.message}`,
+        });
+    }
+}));
+const resetWalletPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        const { token, newPin, } = yield servicesValidationSchema_1.resetWalletPinValidationSchema.validateAsync(req.body);
+        const response = yield (0, CollectorServices_1.resetWalletPinCollector)(collector, token, newPin);
+        if (!response) {
+            throw new Error("An error occurred");
+        }
+        res.status(200).json({
+            status: "success",
+            message: response,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: `${error.message}`,
+        });
+    }
+}));
 module.exports = {
     signUp,
     loginCollector,
@@ -414,4 +473,7 @@ module.exports = {
     forgotPassword,
     checkUsername,
     resetPassword,
+    updateWalletPin,
+    forgotWalletPin,
+    resetWalletPin,
 };

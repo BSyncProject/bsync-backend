@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMyWastes = exports.getAllP = exports.getProducer = exports.getProducerWallet = exports.reportIssues = exports.makePayment = exports.setWalletPin = exports.makeWithdrawal = exports.verifyProducerDeposit = exports.makeDeposit = exports.deleteWaste = exports.postWaste = exports.login = exports.signUp = void 0;
+exports.resetWalletPinProducer = exports.forgotWalletPinProducer = exports.updateProducerWalletPin = exports.getMyWastes = exports.getAllP = exports.getProducer = exports.getProducerWallet = exports.reportIssues = exports.makePayment = exports.setWalletPin = exports.makeWithdrawal = exports.verifyProducerDeposit = exports.makeDeposit = exports.deleteWaste = exports.postWaste = exports.login = exports.signUp = void 0;
 const _ProducerRepository_1 = __importDefault(require("../repository/ ProducerRepository"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -21,11 +21,15 @@ const TransactionRepository_1 = __importDefault(require("../repository/Transacti
 const PaymentServices_1 = require("./PaymentServices");
 const CollectorServices_1 = require("./CollectorServices");
 const PickerRepository_1 = __importDefault(require("../repository/PickerRepository"));
+const EmailServices_1 = __importDefault(require("./EmailServices"));
+const TokenServices_1 = __importDefault(require("./TokenServices"));
 const producerRepository = new _ProducerRepository_1.default();
 const walletRepository = new WalletRepository_1.default();
 const wasteRepository = new WasteRepository_1.default();
 const transactionRepository = new TransactionRepository_1.default();
 const pickerRepository = new PickerRepository_1.default();
+const emailService = new EmailServices_1.default();
+const tokenService = new TokenServices_1.default();
 function signUp(signUpData) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!signUpData.password || !signUpData.username || !signUpData.email) {
@@ -38,6 +42,7 @@ function signUp(signUpData) {
         signUpData.password = yield encode(signUpData.password);
         signUpData.wallet = yield createNewWallet(signUpData.username);
         const newProducer = yield producerRepository.create(signUpData);
+        const response = yield emailService.sendNewAccountEmail(newProducer.email, newProducer.name);
         return newProducer;
     });
 }
@@ -278,3 +283,46 @@ function getMyWastes(producer) {
     });
 }
 exports.getMyWastes = getMyWastes;
+function updateProducerWalletPin(producer, oldPin, newPin) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const wallet = yield getProducerWallet(producer);
+        if (wallet.pin !== oldPin) {
+            throw new Error("Failed Incorrect Pin");
+        }
+        wallet.pin = newPin;
+        const response = walletRepository.update(wallet.id, wallet);
+        if (!response) {
+            throw new Error("An error Occurred, try again Later");
+        }
+        return "Wallet pin updated Successfully";
+    });
+}
+exports.updateProducerWalletPin = updateProducerWalletPin;
+function forgotWalletPinProducer(producer) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = yield tokenService.generateToken();
+        tokenService.addToken(token, producer.email);
+        const response = yield emailService.forgotPassword(producer.email, producer.name, token);
+        if (!response) {
+            throw new Error("An error occurred");
+        }
+        return response;
+    });
+}
+exports.forgotWalletPinProducer = forgotWalletPinProducer;
+function resetWalletPinProducer(producer, token, newPin) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield tokenService.checkToken(token, producer.email);
+        if (response !== true) {
+            throw new Error("Invalid Token");
+        }
+        const wallet = yield getProducerWallet(producer);
+        wallet.pin = newPin;
+        const updatedWallet = yield walletRepository.update(wallet.id, wallet);
+        if (!updatedWallet) {
+            throw new Error("An error occurred");
+        }
+        return "Wallet pin reset successful";
+    });
+}
+exports.resetWalletPinProducer = resetWalletPinProducer;

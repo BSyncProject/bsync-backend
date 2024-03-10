@@ -124,7 +124,7 @@ class EmailServices {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Bsync Account Password Reset</title>
+        <title>Bsync Reset</title>
         <style>
           body {
             font-family: Arial, sans-serif;
@@ -148,13 +148,13 @@ class EmailServices {
       </head>
       <body>
         <div class="container">
-          <p>Your password reset token is: </p>
+          <p>Your reset token is: </p>
           <h1>${token}</h1>
         </div>
 
         <div>
           <p>
-          You got this email because you requested a password reset, if that was not done by you, do not perform any action and do not share this token with anyone.
+          You got this email because you requested a reset, if that was not done by you, do not perform any action and do not share this token with anyone.
           </p>
         </div>
       </body>
