@@ -17,6 +17,8 @@ import {
   getAllPickers,
   getCollectorPickers,
   updateControllerWalletPin,
+  forgotWalletPinCollector,
+  resetWalletPinCollector,
 
 } from '../services/CollectorServices'; 
 import {signToken} from '../utils/tokenUtils'
@@ -41,6 +43,7 @@ import {
   forgotPasswordValidationSchema,
   checkUsernameValidationSchema,
   resetPasswordValidationSchema,
+  resetWalletPinValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Collector } from '../models/Collector';
@@ -636,6 +639,53 @@ const updateWalletPin = catchAsync(async(req: CustomRequest, res: Response) => {
   
 })
 
+const forgotWalletPin = catchAsync(async(req: CustomRequest, res: Response) => {
+  try {
+
+    const collector: Collector = checkCollectorIsProvided(req);
+
+    const response = await forgotWalletPinCollector(collector);
+    if(!response) {throw new Error("An error occurred");}
+    
+    res.status(200).json({
+      status: "success",
+      message: "Check your email for a wallet reset token",
+    })
+
+  } catch(error: any){
+    res.status(500).json({
+      status: 'failed',
+      message: `${error.message}`,
+    })
+  }
+})
+
+const resetWalletPin = catchAsync(async(req: CustomRequest, res: Response) => {
+  try {
+
+    const collector: Collector = checkCollectorIsProvided(req);
+
+    const {
+      token, 
+      newPin,
+    } = await resetWalletPinValidationSchema.validateAsync(req.body)
+    const response = await resetWalletPinCollector(collector, token, newPin);
+
+    if(!response) {throw new Error("An error occurred");}
+    
+    res.status(200).json({
+      status: "success",
+      message: response,
+    })
+
+  } catch(error: any){
+    res.status(500).json({
+      status: 'failed',
+      message: `${error.message}`,
+    })
+  }
+})
+
 module.exports = {
   signUp,
   loginCollector,
@@ -656,6 +706,8 @@ module.exports = {
   forgotPassword,
   checkUsername,
   resetPassword,
-  updateWalletPin
+  updateWalletPin,
+  forgotWalletPin,
+  resetWalletPin,
   
 }

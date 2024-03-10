@@ -18,6 +18,7 @@ import WasteRepository from '../repository/WasteRepository';
 import { Waste } from '../models/Waste';
 import { getProducer } from './ProducerServices';
 import EmailServices from './EmailServices';
+import TokenService from './TokenServices';
 
 const collectorRepository = new CollectorRepository();
 const walletRepository = new WalletRepository();
@@ -25,6 +26,8 @@ const pickerServices  = new PickerServices();
 const transactionRepository = new TransactionRepository();
 const wasteRepository = new WasteRepository();
 const emailService = new EmailServices();
+const tokenService = new TokenService()
+
 export async function signUpCollector(signUpData: Partial<Collector>): Promise<Collector> {
 
   if(!signUpData.password || !signUpData.username || !signUpData.email){
@@ -388,7 +391,33 @@ export async function updateControllerWalletPin(collector: Collector, oldPin: st
   return "Wallet pin updated Successfully";
 }
 
+export async function forgotWalletPinCollector(collector: Collector){
 
+  const token = await tokenService.generateToken();
+  tokenService.addToken(token, collector.email);
+  const response  = await emailService.forgotPassword(collector.email, collector.name, token);
+  if(!response){
+    throw new Error("An error occurred");
+  }
 
+  return response;
+}
+
+export async function resetWalletPinCollector(collector: Collector, token: string, newPin: string){
+
+  const response =await tokenService.checkToken(token, collector.email);
+  
+  if(response !== true){ throw new Error("Invalid Token"); }
+
+  const wallet = await getCollectorWallet(collector);
+  wallet.pin = newPin;
+
+  const updatedWallet = await walletRepository.update(wallet.id, wallet);
+
+  if(!updatedWallet){ throw new Error("An error occurred"); }
+
+  return "Wallet pin reset successful";
+
+}
 
 

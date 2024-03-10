@@ -323,6 +323,65 @@ const resetPassword = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
         message: "Password reset successful",
     });
 }));
+const updateWalletPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const producer = checkProducerIsProvided(req);
+        const { oldPin, newPin, } = yield servicesValidationSchema_1.updatePickerValidationSchema.validateAsync(req.body);
+        const response = yield (0, ProducerServices_1.updateProducerWalletPin)(producer, oldPin, newPin);
+        if (!response) {
+            throw new Error("An error occurred");
+        }
+        res.status(200).json({
+            status: "success",
+            message: response,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: "failed",
+            message: `${error.message}`,
+        });
+    }
+}));
+const forgotWalletPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const producer = checkProducerIsProvided(req);
+        const response = yield (0, ProducerServices_1.forgotWalletPinProducer)(producer);
+        if (!response) {
+            throw new Error("An error occurred");
+        }
+        res.status(200).json({
+            status: "success",
+            message: "Check your email for a wallet reset token",
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: `${error.message}`,
+        });
+    }
+}));
+const resetWalletPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const producer = checkProducerIsProvided(req);
+        const { token, newPin, } = yield servicesValidationSchema_1.resetWalletPinValidationSchema.validateAsync(req.body);
+        const response = yield (0, ProducerServices_1.resetWalletPinProducer)(producer, token, newPin);
+        if (!response) {
+            throw new Error("An error occurred");
+        }
+        res.status(200).json({
+            status: "success",
+            message: response,
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: `${error.message}`,
+        });
+    }
+}));
 module.exports = {
     signUpProducer,
     loginProducer,
@@ -339,5 +398,8 @@ module.exports = {
     getWastes,
     forgotPassword,
     checkUsername,
-    resetPassword
+    resetPassword,
+    updateWalletPin,
+    resetWalletPin,
+    forgotWalletPin,
 };

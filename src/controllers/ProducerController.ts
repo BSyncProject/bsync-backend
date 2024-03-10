@@ -14,6 +14,8 @@ import {
   getAllP,
   getMyWastes,  
   updateProducerWalletPin,
+  resetWalletPinProducer,
+  forgotWalletPinProducer,
 
  } from '../services/ProducerServices';
 import {signToken} from '../utils/tokenUtils'
@@ -37,6 +39,7 @@ import {
   forgotPasswordValidationSchema,
   resetPasswordValidationSchema,
   updatePickerValidationSchema,
+  resetWalletPinValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Producer } from '../models/Producer';
@@ -540,6 +543,53 @@ const updateWalletPin = catchAsync(async(req: CustomRequest, res: Response) => {
 })
 
 
+const forgotWalletPin = catchAsync(async(req: CustomRequest, res: Response) => {
+  try {
+
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const response = await forgotWalletPinProducer(producer);
+    if(!response) {throw new Error("An error occurred");}
+    
+    res.status(200).json({
+      status: "success",
+      message: "Check your email for a wallet reset token",
+    })
+
+  } catch(error: any){
+    res.status(500).json({
+      status: 'failed',
+      message: `${error.message}`,
+    })
+  }
+})
+
+const resetWalletPin = catchAsync(async(req: CustomRequest, res: Response) => {
+  try {
+
+    const producer: Producer = checkProducerIsProvided(req);
+
+    const {
+      token, 
+      newPin,
+    } = await resetWalletPinValidationSchema.validateAsync(req.body)
+    const response = await resetWalletPinProducer(producer, token, newPin);
+
+    if(!response) {throw new Error("An error occurred");}
+    
+    res.status(200).json({
+      status: "success",
+      message: response,
+    })
+
+  } catch(error: any){
+    res.status(500).json({
+      status: 'failed',
+      message: `${error.message}`,
+    })
+  }
+})
+
 
 module.exports = {
   signUpProducer,
@@ -559,7 +609,8 @@ module.exports = {
   checkUsername,
   resetPassword,
   updateWalletPin,
-
+  resetWalletPin,
+  forgotWalletPin,
 
 };
 

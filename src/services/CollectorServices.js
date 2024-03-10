@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCollectorPickers = exports.getAllPickers = exports.getCollector = exports.getWastes = exports.updatePickerr = exports.deletePickerr = exports.addPickerr = exports.becomeAgent = exports.setWalletPin = exports.getCollectorWallet = exports.makePayment = exports.makeWithdrawal = exports.verifyCollectorDeposit = exports.makeDeposit = exports.login = exports.signUpCollector = void 0;
+exports.resetWalletPinCollector = exports.forgotWalletPinCollector = exports.updateControllerWalletPin = exports.getCollectorPickers = exports.getAllPickers = exports.getCollector = exports.getWastes = exports.updatePickerr = exports.deletePickerr = exports.addPickerr = exports.becomeAgent = exports.setWalletPin = exports.getCollectorWallet = exports.makePayment = exports.makeWithdrawal = exports.verifyCollectorDeposit = exports.makeDeposit = exports.login = exports.signUpCollector = void 0;
 const CollectorRepository_1 = __importDefault(require("../repository/CollectorRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
@@ -22,12 +22,14 @@ const TransactionRepository_1 = __importDefault(require("../repository/Transacti
 const WasteRepository_1 = __importDefault(require("../repository/WasteRepository"));
 const ProducerServices_1 = require("./ProducerServices");
 const EmailServices_1 = __importDefault(require("./EmailServices"));
+const TokenServices_1 = __importDefault(require("./TokenServices"));
 const collectorRepository = new CollectorRepository_1.default();
 const walletRepository = new WalletRepository_1.default();
 const pickerServices = new PickerServices_1.default();
 const transactionRepository = new TransactionRepository_1.default();
 const wasteRepository = new WasteRepository_1.default();
 const emailService = new EmailServices_1.default();
+const tokenService = new TokenServices_1.default();
 function signUpCollector(signUpData) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!signUpData.password || !signUpData.username || !signUpData.email) {
@@ -324,3 +326,46 @@ function getCollectorPickers(collector) {
     });
 }
 exports.getCollectorPickers = getCollectorPickers;
+function updateControllerWalletPin(collector, oldPin, newPin) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const wallet = yield getCollectorWallet(collector);
+        if (wallet.pin !== oldPin) {
+            throw new Error("Failed Incorrect Pin");
+        }
+        wallet.pin = newPin;
+        const response = walletRepository.update(wallet.id, wallet);
+        if (!response) {
+            throw new Error("An error Occurred, try again Later");
+        }
+        return "Wallet pin updated Successfully";
+    });
+}
+exports.updateControllerWalletPin = updateControllerWalletPin;
+function forgotWalletPinCollector(collector) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = yield tokenService.generateToken();
+        tokenService.addToken(token, collector.email);
+        const response = yield emailService.forgotPassword(collector.email, collector.name, token);
+        if (!response) {
+            throw new Error("An error occurred");
+        }
+        return response;
+    });
+}
+exports.forgotWalletPinCollector = forgotWalletPinCollector;
+function resetWalletPinCollector(collector, token, newPin) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield tokenService.checkToken(token, collector.email);
+        if (response !== true) {
+            throw new Error("Invalid Token");
+        }
+        const wallet = yield getCollectorWallet(collector);
+        wallet.pin = newPin;
+        const updatedWallet = yield walletRepository.update(wallet.id, wallet);
+        if (!updatedWallet) {
+            throw new Error("An error occurred");
+        }
+        return "Wallet pin reset successful";
+    });
+}
+exports.resetWalletPinCollector = resetWalletPinCollector;
