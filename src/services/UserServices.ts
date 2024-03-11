@@ -10,16 +10,17 @@ const emailService = new EmailServices()
 
 class UserService{
 
-  async checkUsername(username:string, role: string): Promise<String>{
+  async checkUsername(role: string): Promise<string[]>{
     let foundUser;
-    if(role === 'collector'){
-      foundUser = await CollectorModel.findOne({username: username})
-    } else{
-      foundUser = await ProducerModel.findOne({username: username})
+    if (role === 'collector') {
+        foundUser = await CollectorModel.find();
+    } else {
+        foundUser = await ProducerModel.find();
     }
-
-    if(foundUser){ return "Username already taken"}
-    else{ return "Username Confirmed and can be used"}
+    
+    const usernames = foundUser.map(user => user.username);
+    return usernames;
+  
   }
 
   async forgotPassword(email:string, role: string) {

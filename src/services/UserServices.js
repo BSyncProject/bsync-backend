@@ -19,21 +19,17 @@ const TokenServices_1 = __importDefault(require("./TokenServices"));
 const tokenService = new TokenServices_1.default();
 const emailService = new EmailServices_1.default();
 class UserService {
-    checkUsername(username, role) {
+    checkUsername(role) {
         return __awaiter(this, void 0, void 0, function* () {
             let foundUser;
             if (role === 'collector') {
-                foundUser = yield Collector_1.CollectorModel.findOne({ username: username });
+                foundUser = yield Collector_1.CollectorModel.find();
             }
             else {
-                foundUser = yield Producer_1.ProducerModel.findOne({ username: username });
+                foundUser = yield Producer_1.ProducerModel.find();
             }
-            if (foundUser) {
-                return "Username already taken";
-            }
-            else {
-                return "Username Confirmed and can be used";
-            }
+            const usernames = foundUser.map(user => user.username);
+            return usernames;
         });
     }
     forgotPassword(email, role) {

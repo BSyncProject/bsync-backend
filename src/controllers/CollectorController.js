@@ -373,8 +373,7 @@ const forgotPassword = catchAsync((req, res) => __awaiter(void 0, void 0, void 0
     }
 }));
 const checkUsername = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, } = yield servicesValidationSchema_1.checkUsernameValidationSchema.validateAsync(req.body);
-    const response = yield userService.checkUsername(username, 'collector');
+    const response = yield userService.checkUsername('collector');
     if (!response) {
         throw new Error(" An error occurred");
     }

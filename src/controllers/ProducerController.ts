@@ -453,11 +453,8 @@ const getWastes = catchAsync(async (req: CustomRequest, res: Response) => {
 })
 
 const checkUsername = catchAsync(async(req: Request, res: Response) => {
-
-  const {
-    username,
-  } = await checkUsernameValidationSchema.validateAsync(req.body);
-  const response = await userService.checkUsername(username, 'producer');
+  
+  const response = await userService.checkUsername('producer');
 
   if (!response) {
     throw new Error(" An error occurred")
