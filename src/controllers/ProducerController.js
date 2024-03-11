@@ -283,8 +283,7 @@ const getWastes = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 }));
 const checkUsername = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, } = yield servicesValidationSchema_1.checkUsernameValidationSchema.validateAsync(req.body);
-    const response = yield userService.checkUsername(username, 'producer');
+    const response = yield userService.checkUsername('producer');
     if (!response) {
         throw new Error(" An error occurred");
     }

@@ -579,10 +579,8 @@ const forgotPassword = catchAsync(async(req: Request, res: Response) => {
 
 const checkUsername = catchAsync(async(req: Request, res: Response) => {
 
-  const {
-    username,
-  } = await checkUsernameValidationSchema.validateAsync(req.body);
-  const response = await userService.checkUsername(username, 'collector');
+  
+  const response = await userService.checkUsername('collector');
 
   if (!response) {
     throw new Error(" An error occurred")
