@@ -30,29 +30,30 @@ const transactionRepository = new TransactionRepository_1.default();
 const wasteRepository = new WasteRepository_1.default();
 const emailService = new EmailServices_1.default();
 const tokenService = new TokenServices_1.default();
-function signUpCollector(signUpData) {
+function signUpCollector(signUpData, pin) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!signUpData.password || !signUpData.username || !signUpData.email) {
             throw new Error("Incomplete Details");
         }
         const existingCollector = yield collectorRepository.check(signUpData.username, signUpData.email);
         if (existingCollector) {
-            throw new Error('Username is already taken');
+            throw new Error(' Username or email is already used');
         }
         signUpData.password = yield encode(signUpData.password);
-        signUpData.wallet = yield createNewWallet(signUpData.username);
+        signUpData.wallet = yield createNewWallet(signUpData.username, pin);
         const newCollector = yield collectorRepository.create(signUpData);
         emailService.sendNewAccountEmail(newCollector.email, newCollector.name);
         return newCollector;
     });
 }
 exports.signUpCollector = signUpCollector;
-function createNewWallet(username) {
+function createNewWallet(username, pin) {
     return __awaiter(this, void 0, void 0, function* () {
+        const hashedPin = yield encode(pin);
         const walletData = {
             owner: username,
             balance: 0,
-            pin: "null",
+            pin: hashedPin,
         };
         const newWallet = yield walletRepository.create(walletData);
         return newWallet;
