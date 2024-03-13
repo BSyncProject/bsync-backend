@@ -1,8 +1,8 @@
 const Joi = require('joi')
 
 export const signupProducerValidationSchema = Joi.object().keys({
-    name: Joi.string().required().min(5),
-    username: Joi.string().required().min(5),
+    name: Joi.string().required().min(3),
+    username: Joi.string().required().min(3),
     phoneNumber: Joi.string().required().min(8).max(14),
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
