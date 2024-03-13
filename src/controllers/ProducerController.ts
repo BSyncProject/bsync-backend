@@ -226,10 +226,9 @@ const depositMoney = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const {
       amount,
-      email,
     } = await depositValidationSchema.validateAsync(req.body);
 
-    const response = await makeDeposit(amount, email);
+    const response = await makeDeposit(amount, producer.email);
 
     if (!response) {
       throw new Error(" An error occurred");

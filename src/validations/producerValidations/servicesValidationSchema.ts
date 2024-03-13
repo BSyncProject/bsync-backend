@@ -21,7 +21,6 @@ export const deleteWasteValidationSchema = Joi.object().keys({
 });
 
 export const depositValidationSchema = Joi.object().keys({
-  email: Joi.string().required(),
   amount: Joi.number().required(),
 });
 
