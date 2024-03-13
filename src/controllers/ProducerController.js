@@ -32,7 +32,11 @@ const signUpProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0
             wallet
         };
         const newProducer = yield (0, ProducerServices_1.signUp)(signUpData);
-        return res.status(201).json(newProducer);
+        const token = (0, tokenUtils_1.signToken)(newProducer.id);
+        return res.status(201).json({
+            data: newProducer,
+            token: token
+        });
     }
     catch (error) {
         return res.status(500).json({ error: `Signup failed: ${error.message}` });

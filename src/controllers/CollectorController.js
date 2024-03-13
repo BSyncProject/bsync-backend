@@ -33,7 +33,11 @@ const signUp = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, functi
             wallet,
         };
         const newCollector = yield (0, CollectorServices_1.signUpCollector)(signUpData);
-        return res.status(201).json(newCollector);
+        const token = (0, tokenUtils_1.signToken)(newCollector.id);
+        return res.status(201).json({
+            data: newCollector,
+            token: token
+        });
     }
     catch (error) {
         return res.status(500).json({ error: `Signup failed: ${error.message}` });
