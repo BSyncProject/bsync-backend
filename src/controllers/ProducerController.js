@@ -21,7 +21,7 @@ const catchAsync = require('../utils/catchAsync');
 const userService = new UserServices_1.default();
 const signUpProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { username, password, email, phoneNumber, name, address, wallet } = yield AuthValidations_1.signupProducerValidationSchema.validateAsync(req.body);
+        const { username, password, email, phoneNumber, name, address, wallet, pin, } = yield AuthValidations_1.signupProducerValidationSchema.validateAsync(req.body);
         const signUpData = {
             username,
             password,
@@ -31,12 +31,9 @@ const signUpProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0
             address,
             wallet
         };
-        const newProducer = yield (0, ProducerServices_1.signUp)(signUpData);
+        const newProducer = yield (0, ProducerServices_1.signUp)(signUpData, pin);
         const token = (0, tokenUtils_1.signToken)(newProducer.id);
-        return res.status(201).json({
-            data: newProducer,
-            token: token
-        });
+        return res.status(201).json(Object.assign(Object.assign({}, newProducer), { token: token }));
     }
     catch (error) {
         return res.status(500).json({ error: `Signup failed: ${error.message}` });

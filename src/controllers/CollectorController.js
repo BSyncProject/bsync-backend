@@ -21,7 +21,7 @@ const catchAsync = require('../utils/catchAsync');
 const userService = new UserServices_1.default();
 const signUp = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { username, password, email, phoneNumber, name, serviceArea, address, wallet, } = yield AuthValidations_1.signupValidationSchema.validateAsync(req.body);
+        const { username, password, email, phoneNumber, name, serviceArea, address, wallet, pin, } = yield AuthValidations_1.signupValidationSchema.validateAsync(req.body);
         const signUpData = {
             username,
             password,
@@ -32,12 +32,9 @@ const signUp = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, functi
             address,
             wallet,
         };
-        const newCollector = yield (0, CollectorServices_1.signUpCollector)(signUpData);
+        const newCollector = yield (0, CollectorServices_1.signUpCollector)(signUpData, pin);
         const token = (0, tokenUtils_1.signToken)(newCollector.id);
-        return res.status(201).json({
-            data: newCollector,
-            token: token
-        });
+        return res.status(201).json(Object.assign(Object.assign({}, newCollector), { token: token }));
     }
     catch (error) {
         return res.status(500).json({ error: `Signup failed: ${error.message}` });

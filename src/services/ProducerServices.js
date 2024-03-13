@@ -30,28 +30,30 @@ const transactionRepository = new TransactionRepository_1.default();
 const pickerRepository = new PickerRepository_1.default();
 const emailService = new EmailServices_1.default();
 const tokenService = new TokenServices_1.default();
-function signUp(signUpData) {
+function signUp(signUpData, pin) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!signUpData.password || !signUpData.username || !signUpData.email) {
             throw new Error("An error occurred");
         }
         const existingProducer = yield producerRepository.check(signUpData.username, signUpData.email);
         if (existingProducer) {
-            throw new Error('Username is already taken');
+            throw new Error('Username or email is already taken');
         }
         signUpData.password = yield encode(signUpData.password);
-        signUpData.wallet = yield createNewWallet(signUpData.username);
+        signUpData.wallet = yield createNewWallet(signUpData.username, pin);
         const newProducer = yield producerRepository.create(signUpData);
         const response = yield emailService.sendNewAccountEmail(newProducer.email, newProducer.name);
         return newProducer;
     });
 }
 exports.signUp = signUp;
-function createNewWallet(username) {
+function createNewWallet(username, pin) {
     return __awaiter(this, void 0, void 0, function* () {
+        const hashedPin = yield encode(pin);
         const walletData = {
             owner: username,
-            balance: 0
+            balance: 0,
+            pin: hashedPin,
         };
         const newWallet = yield walletRepository.create(walletData);
         return newWallet;
