@@ -49,7 +49,6 @@ import {
 import { Collector } from '../models/Collector';
 import { Picker } from '../models/Picker';
 import UserService from '../services/UserServices';
-import TokenService from '../services/TokenServices';
 
 const catchAsync = require('../utils/catchAsync');
 const userService = new UserService();
@@ -78,10 +77,9 @@ const signUp = catchAsync(async (req: Request, res: Response) => {
       serviceArea,
       address, 
       wallet,
-      pin,
     }; 
  
-    const newCollector = await signUpCollector(signUpData);
+    const newCollector = await signUpCollector(signUpData, pin);
 
     const token = signToken(newCollector.id);
     return res.status(201).json(
