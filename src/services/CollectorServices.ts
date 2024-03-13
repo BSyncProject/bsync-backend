@@ -42,6 +42,7 @@ export async function signUpCollector(signUpData: Partial<Collector>): Promise<C
   signUpData.password = await encode(signUpData.password);
   signUpData.wallet = await createNewWallet(signUpData.username);
   
+  
   const newCollector = await collectorRepository.create(signUpData);
   emailService.sendNewAccountEmail(newCollector.email, newCollector.name);
   return newCollector;

@@ -74,10 +74,8 @@ const signUpProducer = catchAsync(async (req: Request, res: Response) => {
     const newProducer = await signUp(signUpData);
 
     const token = signToken(newProducer.id);
-    return res.status(201).json({
-      data: newProducer,
-      token: token
-    });
+    return res.status(201).json({...newProducer, token: token}
+    );
 
   } catch (error: any) {
     return res.status(500).json({ error: `Signup failed: ${error.message}` });

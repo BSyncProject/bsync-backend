@@ -65,6 +65,7 @@ const signUp = catchAsync(async (req: Request, res: Response) => {
       serviceArea,
       address,
       wallet,
+      pin,
 
     } = await signupValidationSchema.validateAsync(req.body);
 
@@ -77,15 +78,15 @@ const signUp = catchAsync(async (req: Request, res: Response) => {
       serviceArea,
       address, 
       wallet,
+      pin,
     }; 
  
     const newCollector = await signUpCollector(signUpData);
 
     const token = signToken(newCollector.id);
-    return res.status(201).json({
-      data: newCollector,
-      token: token
-    });
+    return res.status(201).json(
+      {...newCollector, token: token}
+    );
   } catch (error: any) {
     return res.status(500).json({ error: `Signup failed: ${error.message}` });
   }
