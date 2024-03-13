@@ -30,7 +30,7 @@ const emailService = new EmailServices();
 const tokenService = new TokenService();
 
 
-export async function signUp(signUpData: Partial<Producer>): Promise<Producer> {
+export async function signUp(signUpData: Partial<Producer>, pin: string): Promise<Producer> {
 
   if(!signUpData.password || !signUpData.username || !signUpData.email){
     throw new Error("An error occurred");
@@ -39,11 +39,11 @@ export async function signUp(signUpData: Partial<Producer>): Promise<Producer> {
   const existingProducer = await producerRepository.check(signUpData.username, signUpData.email);
     
   if (existingProducer) {
-    throw new Error('Username is already taken');
+    throw new Error('Username or email is already taken');
   }
 
   signUpData.password = await encode(signUpData.password);
-  signUpData.wallet = await createNewWallet(signUpData.username)
+  signUpData.wallet = await createNewWallet(signUpData.username, pin)
 
   const newProducer = await producerRepository.create(signUpData);
   const response = await emailService.sendNewAccountEmail(newProducer.email, newProducer.name);
@@ -51,10 +51,12 @@ export async function signUp(signUpData: Partial<Producer>): Promise<Producer> {
   
 }
 
-async function createNewWallet(username: string): Promise<Wallet> {
+async function createNewWallet(username: string, pin: string): Promise<Wallet> {
+  const hashedPin = await encode(pin);
   const walletData: Partial<Wallet> = {
     owner: username,
-    balance: 0
+    balance: 0,
+    pin: hashedPin,
   }
   const newWallet = await walletRepository.create(walletData);
   return newWallet;

@@ -58,7 +58,8 @@ const signUpProducer = catchAsync(async (req: Request, res: Response) => {
       phoneNumber, 
       name, 
       address, 
-      wallet
+      wallet, 
+      pin,
     } = await signupProducerValidationSchema.validateAsync(req.body);
 
     const signUpData = {
@@ -71,7 +72,7 @@ const signUpProducer = catchAsync(async (req: Request, res: Response) => {
       wallet
     };
 
-    const newProducer = await signUp(signUpData);
+    const newProducer = await signUp(signUpData, pin);
 
     const token = signToken(newProducer.id);
     return res.status(201).json({...newProducer, token: token}

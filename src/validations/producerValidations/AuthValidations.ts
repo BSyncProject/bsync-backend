@@ -7,6 +7,7 @@ export const signupProducerValidationSchema = Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
     address: Joi.string().required().min(4),
+    pin: Joi.string().required().length(4),
     
 });
 

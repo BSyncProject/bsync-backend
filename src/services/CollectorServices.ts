@@ -28,7 +28,7 @@ const wasteRepository = new WasteRepository();
 const emailService = new EmailServices();
 const tokenService = new TokenService()
 
-export async function signUpCollector(signUpData: Partial<Collector>): Promise<Collector> {
+export async function signUpCollector(signUpData: Partial<Collector>, pin: string): Promise<Collector> {
 
   if(!signUpData.password || !signUpData.username || !signUpData.email){
     throw new Error("Incomplete Details");
@@ -36,11 +36,11 @@ export async function signUpCollector(signUpData: Partial<Collector>): Promise<C
 
   const existingCollector = await collectorRepository.check(signUpData.username, signUpData.email);
   if (existingCollector) {
-    throw new Error('Username is already taken');
+    throw new Error(' Username or email is already used');
   }
 
   signUpData.password = await encode(signUpData.password);
-  signUpData.wallet = await createNewWallet(signUpData.username);
+  signUpData.wallet = await createNewWallet(signUpData.username, pin);
   
   
   const newCollector = await collectorRepository.create(signUpData);
@@ -50,11 +50,12 @@ export async function signUpCollector(signUpData: Partial<Collector>): Promise<C
 }
 
 
-async function createNewWallet(username: string): Promise<Wallet> {
+async function createNewWallet(username: string, pin: string): Promise<Wallet> {
+  const hashedPin = await encode(pin);
   const walletData: Partial<Wallet> = {
     owner: username,
     balance: 0,
-    pin: "null",
+    pin: hashedPin,
   }
   const newWallet = await walletRepository.create(walletData);
   return newWallet;
