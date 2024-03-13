@@ -85,8 +85,8 @@ const collectorWithdrawal = catchAsync((req, res) => __awaiter(void 0, void 0, v
 const collectorDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const collector = checkCollectorIsProvided(req);
-        const { amount, email, } = yield servicesValidationSchema_1.depositValidationSchema.validateAsync(req.body);
-        const response = yield (0, CollectorServices_1.makeDeposit)(amount, email);
+        const { amount, } = yield servicesValidationSchema_1.depositValidationSchema.validateAsync(req.body);
+        const response = yield (0, CollectorServices_1.makeDeposit)(amount, collector.email);
         if (!response) {
             throw new Error(" An error occurred");
         }

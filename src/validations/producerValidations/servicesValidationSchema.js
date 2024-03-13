@@ -19,7 +19,6 @@ exports.deleteWasteValidationSchema = Joi.object().keys({
     waste_id: Joi.string().required(),
 });
 exports.depositValidationSchema = Joi.object().keys({
-    email: Joi.string().required(),
     amount: Joi.number().required(),
 });
 exports.verifyDepositValidationSchema = Joi.object().keys({

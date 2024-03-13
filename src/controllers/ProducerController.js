@@ -125,8 +125,8 @@ const withdrawMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0,
 const depositMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const producer = checkProducerIsProvided(req);
-        const { amount, email, } = yield servicesValidationSchema_1.depositValidationSchema.validateAsync(req.body);
-        const response = yield (0, ProducerServices_1.makeDeposit)(amount, email);
+        const { amount, } = yield servicesValidationSchema_1.depositValidationSchema.validateAsync(req.body);
+        const response = yield (0, ProducerServices_1.makeDeposit)(amount, producer.email);
         if (!response) {
             throw new Error(" An error occurred");
         }
