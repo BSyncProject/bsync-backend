@@ -6,6 +6,7 @@ export const signupProducerValidationSchema = Joi.object().keys({
     phoneNumber: Joi.string().required().min(8).max(14),
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
+    serviceArea: Joi.string().required().min(3),
     address: Joi.string().required().min(4),
     pin: Joi.string().required().length(4),
     
