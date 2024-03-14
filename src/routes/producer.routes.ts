@@ -21,6 +21,7 @@ const {
   updateWalletPin,
   resetWalletPin,
   forgotWalletPin,
+  getUser,
 
 } = require('../controllers/ProducerController');
 
@@ -34,6 +35,7 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 
 router.use(producerAuth);
+router.get("/getUser", getUser)
 router.post('/waste', postPWaste);
 router.post('/withdrawal', withdrawMoney);
 router.post('/deposit', depositMoney);
