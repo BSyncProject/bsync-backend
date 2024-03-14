@@ -25,6 +25,7 @@ const {
   updateWalletPin,
   forgotWalletPin,
   resetWalletPin,
+  getUser
 
 } = require('../controllers/CollectorController');
 
@@ -36,6 +37,7 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 
 router.use(collectorAuth);
+router.get("/getUser", getUser)
 router.post('/withdrawal', collectorWithdrawal);
 router.post('/deposit', collectorDeposit);
 router.post('/verifyDeposit', verifyCollDeposit);

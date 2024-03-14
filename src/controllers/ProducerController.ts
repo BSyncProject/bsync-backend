@@ -590,6 +590,22 @@ const resetWalletPin = catchAsync(async(req: CustomRequest, res: Response) => {
 })
 
 
+const getUser = catchAsync(async(req: CustomRequest, res: Response) => {
+  try {
+
+    const producer: Producer = checkProducerIsProvided(req);
+    
+    res.status(200).json(producer)
+
+  } catch(error: any){
+    res.status(500).json({
+      status: 'failed',
+      message: `${error.message}`,
+    })
+  }
+})
+
+
 module.exports = {
   signUpProducer,
   loginProducer,
@@ -610,6 +626,7 @@ module.exports = {
   updateWalletPin,
   resetWalletPin,
   forgotWalletPin,
+  getUser,
 
 };
 

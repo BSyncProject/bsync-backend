@@ -382,6 +382,18 @@ const resetWalletPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0
         });
     }
 }));
+const getUser = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const producer = checkProducerIsProvided(req);
+        res.status(200).json(producer);
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: `${error.message}`,
+        });
+    }
+}));
 module.exports = {
     signUpProducer,
     loginProducer,
@@ -402,4 +414,5 @@ module.exports = {
     updateWalletPin,
     resetWalletPin,
     forgotWalletPin,
+    getUser,
 };

@@ -686,6 +686,22 @@ const resetWalletPin = catchAsync(async(req: CustomRequest, res: Response) => {
   }
 })
 
+const getUser = catchAsync(async(req: CustomRequest, res: Response) => {
+  try {
+
+    const collector: Collector = checkCollectorIsProvided(req);
+    
+    res.status(200).json(collector)
+
+  } catch(error: any){
+    res.status(500).json({
+      status: 'failed',
+      message: `${error.message}`,
+    })
+  }
+})
+
+
 module.exports = {
   signUp,
   loginCollector,
