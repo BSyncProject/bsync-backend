@@ -102,13 +102,13 @@ const collectorDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, void
 const verifyCollDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const collector = checkCollectorIsProvided(req);
-        const { reference, } = yield servicesValidationSchema_1.verifyDepositValidationSchema.validateAsync(req.body);
-        const response = yield (0, CollectorServices_1.verifyCollectorDeposit)(reference, collector);
+        const { reference, amount, } = yield servicesValidationSchema_1.verifyDepositValidationSchema.validateAsync(req.body);
+        const response = yield (0, CollectorServices_1.verifyCollectorDeposit)(amount, reference, collector);
         if (!response) {
             throw new Error(" An error occurred");
         }
         res.status(200).json({
-            status: 'success',
+            status: 'Deposit successful',
             message: response,
         });
     }

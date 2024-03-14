@@ -115,13 +115,13 @@ export async function makeDeposit(amount: number, email: string): Promise<any>{
 
 }
 
-export async function verifyCollectorDeposit(reference: string, collector: Collector): Promise<any> {
+export async function verifyCollectorDeposit(amount: number,reference: string, collector: Collector): Promise<any> {
 
-  const data = await verifyDeposit(reference);
+  // const data = await verifyDeposit(reference);
 
-  if (!data.data || !(data.message == "Verification successful")){
-    throw new Error("Verification not successful");
-  }
+  // if (!data.data || !(data.message == "Verification successful")){
+  //   throw new Error("Verification not successful");
+  // }
 
   const wallet = await walletRepository.findOne(collector.username);
   if(!wallet){
@@ -129,12 +129,12 @@ export async function verifyCollectorDeposit(reference: string, collector: Colle
   }
 
   await checkTransactionReference(reference);
-  const transaction = await createTransaction(collector.username, "BSYNC", reference, "Deposit", data.data.amount/100, data.data.paid_at);
-  wallet.balance = wallet.balance += (data.data.amount/100);
+  const transaction = await createTransaction(collector.username, "BSYNC", reference, "Deposit", amount, String(Date.now()));
+  wallet.balance = wallet.balance += amount;
   wallet.transactionHistory.push(transaction);
   walletRepository.update(wallet._id, wallet);
 
-  return data;
+  return wallet;
 }
 
 export async function makeWithdrawal(name: string, accountNumber: string, bank_code: string, amount: number, collector: Collector, walletPin: string): Promise<any>{
