@@ -25,7 +25,7 @@ const {
   updateWalletPin,
   forgotWalletPin,
   resetWalletPin,
-  getUser
+  getUser,
 
 } = require('../controllers/CollectorController');
 
