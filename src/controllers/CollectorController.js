@@ -488,4 +488,5 @@ module.exports = {
     updateWalletPin,
     forgotWalletPin,
     resetWalletPin,
+    getUser,
 };

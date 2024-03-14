@@ -2,7 +2,7 @@
 const { collectorAuth } = require('../middleware/collectorAuth');
 const express = require('express');
 const router = express.Router();
-const { signUp, loginCollector, collectorWithdrawal, collectorDeposit, verifyCollDeposit, becomeAgentPermission, addPicker, deletePicker, updatePicker, getWallet, getAvailableWaste, setPin, makePaymentC, findCollector, collectorPickers, forgotPassword, checkUsername, resetPassword, updateWalletPin, forgotWalletPin, resetWalletPin, getUser } = require('../controllers/CollectorController');
+const { signUp, loginCollector, collectorWithdrawal, collectorDeposit, verifyCollDeposit, becomeAgentPermission, addPicker, deletePicker, updatePicker, getWallet, getAvailableWaste, setPin, makePaymentC, findCollector, collectorPickers, forgotPassword, checkUsername, resetPassword, updateWalletPin, forgotWalletPin, resetWalletPin, getUser, } = require('../controllers/CollectorController');
 router.post('/signup', signUp);
 router.post('/login', loginCollector);
 router.post('/checkUsername', checkUsername);
