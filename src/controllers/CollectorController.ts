@@ -196,10 +196,9 @@ const verifyCollDeposit = catchAsync(async (req: CustomRequest, res: Response) =
 
     const {
       reference,
-      walletPin
     } = await verifyDepositValidationSchema.validateAsync(req.body);
 
-    const response = await verifyCollectorDeposit(reference, collector, walletPin)
+    const response = await verifyCollectorDeposit(reference, collector)
 
     if (!response) {
       throw new Error(" An error occurred");

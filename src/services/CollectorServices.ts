@@ -115,7 +115,7 @@ export async function makeDeposit(amount: number, email: string): Promise<any>{
 
 }
 
-export async function verifyCollectorDeposit(reference: string, collector: Collector, walletPin: string): Promise<any> {
+export async function verifyCollectorDeposit(reference: string, collector: Collector): Promise<any> {
 
   const data = await verifyDeposit(reference);
 
@@ -127,8 +127,6 @@ export async function verifyCollectorDeposit(reference: string, collector: Colle
   if(!wallet){
     throw new Error("Wallet not Found");
   }
-
-  checkWalletPin(walletPin, wallet.pin);
 
   await checkTransactionReference(reference);
   const transaction = await createTransaction(collector.username, "BSYNC", reference, "Deposit", data.data.amount/100, data.data.paid_at);

@@ -142,7 +142,7 @@ export async function makeDeposit(amount: number, email: string): Promise<any>{
 
 }
 
-export async function verifyProducerDeposit(reference: string, producer: Producer, walletPin: string): Promise<any> {
+export async function verifyProducerDeposit(reference: string, producer: Producer): Promise<any> {
 
   const data = await verifyDeposit(reference);
 
@@ -155,7 +155,6 @@ export async function verifyProducerDeposit(reference: string, producer: Produce
     throw new Error("Wallet not Found");
   }
 
-  checkWalletPin(walletPin, wallet.pin);
   await checkTransactionReference(reference);
   
   const transaction = await createTransaction(producer.username, "BSYNC", reference, "Deposit", (data.data.amount/100), data.data.paid_at);

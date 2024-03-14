@@ -256,10 +256,9 @@ const verifyDeposit = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const {
       reference,
-      walletPin
     } = await verifyDepositValidationSchema.validateAsync(req.body);
 
-    const response = await verifyProducerDeposit(reference, producer, walletPin)
+    const response = await verifyProducerDeposit(reference, producer)
 
     if (!response) {
       throw new Error(" An error occurred");

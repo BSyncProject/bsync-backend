@@ -142,8 +142,8 @@ const depositMoney = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
 const verifyDeposit = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const producer = checkProducerIsProvided(req);
-        const { reference, walletPin } = yield servicesValidationSchema_1.verifyDepositValidationSchema.validateAsync(req.body);
-        const response = yield (0, ProducerServices_1.verifyProducerDeposit)(reference, producer, walletPin);
+        const { reference, } = yield servicesValidationSchema_1.verifyDepositValidationSchema.validateAsync(req.body);
+        const response = yield (0, ProducerServices_1.verifyProducerDeposit)(reference, producer);
         if (!response) {
             throw new Error(" An error occurred");
         }

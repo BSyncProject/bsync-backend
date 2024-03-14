@@ -129,7 +129,7 @@ function makeDeposit(amount, email) {
     });
 }
 exports.makeDeposit = makeDeposit;
-function verifyProducerDeposit(reference, producer, walletPin) {
+function verifyProducerDeposit(reference, producer) {
     return __awaiter(this, void 0, void 0, function* () {
         const data = yield (0, PaymentServices_1.verifyDeposit)(reference);
         if (!data.data || !(data.message == "Verification successful")) {
@@ -139,7 +139,6 @@ function verifyProducerDeposit(reference, producer, walletPin) {
         if (!wallet) {
             throw new Error("Wallet not Found");
         }
-        checkWalletPin(walletPin, wallet.pin);
         yield checkTransactionReference(reference);
         const transaction = yield createTransaction(producer.username, "BSYNC", reference, "Deposit", (data.data.amount / 100), data.data.paid_at);
         wallet.balance = wallet.balance + (data.data.amount / 100);
