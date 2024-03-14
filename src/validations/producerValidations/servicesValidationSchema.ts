@@ -26,6 +26,7 @@ export const depositValidationSchema = Joi.object().keys({
 
 export const verifyDepositValidationSchema = Joi.object().keys({
   reference: Joi.string().required(),
+  amount: Joi.number().required(),
 });
 
 

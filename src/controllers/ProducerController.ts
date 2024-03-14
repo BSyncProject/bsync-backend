@@ -256,16 +256,17 @@ const verifyDeposit = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const {
       reference,
+      amount,
     } = await verifyDepositValidationSchema.validateAsync(req.body);
 
-    const response = await verifyProducerDeposit(reference, producer)
+    const response = await verifyProducerDeposit(amount,reference, producer)
 
     if (!response) {
       throw new Error(" An error occurred");
     }
 
     res.status(200).json({
-      status: 'success',
+      status: 'Deposit successful',
       message: response,
     });
 

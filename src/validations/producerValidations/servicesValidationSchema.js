@@ -23,6 +23,7 @@ exports.depositValidationSchema = Joi.object().keys({
 });
 exports.verifyDepositValidationSchema = Joi.object().keys({
     reference: Joi.string().required(),
+    amount: Joi.number().required(),
 });
 exports.addPickerValidationSchema = Joi.object().keys({
     name: Joi.string().required().min(3),

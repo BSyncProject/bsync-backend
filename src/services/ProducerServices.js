@@ -129,22 +129,22 @@ function makeDeposit(amount, email) {
     });
 }
 exports.makeDeposit = makeDeposit;
-function verifyProducerDeposit(reference, producer) {
+function verifyProducerDeposit(amount, reference, producer) {
     return __awaiter(this, void 0, void 0, function* () {
-        const data = yield (0, PaymentServices_1.verifyDeposit)(reference);
-        if (!data.data || !(data.message == "Verification successful")) {
-            throw new Error("Verification not successful");
-        }
+        // const data = await verifyDeposit(amount);
+        // if (!data.data || !(data.message == "Verification successful")){
+        //   throw new Error("Verification not successful");
+        // }
         const wallet = yield walletRepository.findOne(producer.username);
         if (!wallet) {
             throw new Error("Wallet not Found");
         }
-        yield checkTransactionReference(reference);
-        const transaction = yield createTransaction(producer.username, "BSYNC", reference, "Deposit", (data.data.amount / 100), data.data.paid_at);
-        wallet.balance = wallet.balance + (data.data.amount / 100);
+        // await checkTransactionReference(reference);
+        const transaction = yield createTransaction(producer.username, "BSYNC", reference, "Deposit", amount, String(Date.now()));
+        wallet.balance = wallet.balance + amount;
         wallet.transactionHistory.push(transaction);
         walletRepository.update(wallet._id, wallet);
-        return data;
+        return wallet;
     });
 }
 exports.verifyProducerDeposit = verifyProducerDeposit;

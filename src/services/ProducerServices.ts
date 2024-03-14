@@ -142,27 +142,27 @@ export async function makeDeposit(amount: number, email: string): Promise<any>{
 
 }
 
-export async function verifyProducerDeposit(reference: string, producer: Producer): Promise<any> {
+export async function verifyProducerDeposit(amount: number, reference: string, producer: Producer): Promise<any> {
 
-  const data = await verifyDeposit(reference);
+  // const data = await verifyDeposit(amount);
 
-  if (!data.data || !(data.message == "Verification successful")){
-    throw new Error("Verification not successful");
-  }
+  // if (!data.data || !(data.message == "Verification successful")){
+  //   throw new Error("Verification not successful");
+  // }
 
   const wallet = await walletRepository.findOne(producer.username);
   if(!wallet){
     throw new Error("Wallet not Found");
   }
 
-  await checkTransactionReference(reference);
+  // await checkTransactionReference(reference);
   
-  const transaction = await createTransaction(producer.username, "BSYNC", reference, "Deposit", (data.data.amount/100), data.data.paid_at);
-  wallet.balance = wallet.balance + (data.data.amount/100);
+  const transaction = await createTransaction(producer.username, "BSYNC", reference, "Deposit", amount, String(Date.now()));
+  wallet.balance = wallet.balance + amount;
   wallet.transactionHistory.push(transaction);
   walletRepository.update(wallet._id, wallet);
 
-  return data;
+  return wallet;
 }
 
 function checkWalletPin(walletPin: string, hashedPin: string) {

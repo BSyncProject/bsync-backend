@@ -196,16 +196,17 @@ const verifyCollDeposit = catchAsync(async (req: CustomRequest, res: Response) =
 
     const {
       reference,
+      amount,
     } = await verifyDepositValidationSchema.validateAsync(req.body);
 
-    const response = await verifyCollectorDeposit(reference, collector)
+    const response = await verifyCollectorDeposit(amount, reference, collector)
 
     if (!response) {
       throw new Error(" An error occurred");
     }
 
     res.status(200).json({
-      status: 'success',
+      status: 'Deposit successful',
       message: response,
     });
 
