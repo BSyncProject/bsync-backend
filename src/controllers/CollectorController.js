@@ -453,6 +453,18 @@ const resetWalletPin = catchAsync((req, res) => __awaiter(void 0, void 0, void 0
         });
     }
 }));
+const getUser = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const collector = checkCollectorIsProvided(req);
+        res.status(200).json(collector);
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: `${error.message}`,
+        });
+    }
+}));
 module.exports = {
     signUp,
     loginCollector,
