@@ -31,6 +31,7 @@ const producerSchema = new mongoose_1.Schema({
     email: { type: String, required: true },
     phoneNumber: { type: String, required: true },
     name: { type: String, required: true },
+    serviceArea: { type: String, required: true },
     wallet: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Wallet', required: true },
     waste: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Waste' }],
     address: { type: String, required: true }

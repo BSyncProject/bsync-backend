@@ -60,6 +60,7 @@ const signUpProducer = catchAsync(async (req: Request, res: Response) => {
       address, 
       wallet, 
       pin,
+      serviceArea,
     } = await signupProducerValidationSchema.validateAsync(req.body);
 
     const signUpData = {
@@ -69,7 +70,8 @@ const signUpProducer = catchAsync(async (req: Request, res: Response) => {
       phoneNumber, 
       name, 
       address, 
-      wallet
+      wallet,
+      serviceArea,
     };
 
     const newProducer = await signUp(signUpData, pin);

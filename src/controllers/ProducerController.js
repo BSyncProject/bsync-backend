@@ -21,7 +21,7 @@ const catchAsync = require('../utils/catchAsync');
 const userService = new UserServices_1.default();
 const signUpProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { username, password, email, phoneNumber, name, address, wallet, pin, } = yield AuthValidations_1.signupProducerValidationSchema.validateAsync(req.body);
+        const { username, password, email, phoneNumber, name, address, wallet, pin, serviceArea, } = yield AuthValidations_1.signupProducerValidationSchema.validateAsync(req.body);
         const signUpData = {
             username,
             password,
@@ -29,7 +29,8 @@ const signUpProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0
             phoneNumber,
             name,
             address,
-            wallet
+            wallet,
+            serviceArea,
         };
         const newProducer = yield (0, ProducerServices_1.signUp)(signUpData, pin);
         const token = (0, tokenUtils_1.signToken)(newProducer.id);
