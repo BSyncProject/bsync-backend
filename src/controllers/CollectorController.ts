@@ -418,7 +418,7 @@ const getAvailableWaste = catchAsync(async (req: CustomRequest, res: Response) =
     
     const collector: Collector = checkCollectorIsProvided(req);
     
-    const { location } = await wasteAvailabilityValidationSchema.validateAsync(req.params.location);
+    const { location } = await wasteAvailabilityValidationSchema.validateAsync({location:req.params.location});
 
     const listOfAvailableWastes = await getWastes(location);
 
