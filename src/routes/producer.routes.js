@@ -24,7 +24,7 @@ router.post('/wallet/pin', setPin);
 router.post('/transfer', makePaymentP);
 router.get('/find/:username', findProducer);
 router.get('/waste', getWastes);
-router.get('/pickers/:location:', getPickers);
+router.get('/pickers/:location', getPickers);
 router.post('/wallet/update', updateWalletPin);
 router.post('/wallet/resetPin', resetWalletPin);
 router.post('wallet/forgotPin', forgotWalletPin);
