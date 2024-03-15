@@ -259,7 +259,7 @@ const getWallet = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fun
 const getAvailableWaste = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const collector = checkCollectorIsProvided(req);
-        const { location } = yield servicesValidationSchema_1.wasteAvailabilityValidationSchema.validateAsync(req.params.location);
+        const { location } = yield servicesValidationSchema_1.wasteAvailabilityValidationSchema.validateAsync({ location: req.params.location });
         const listOfAvailableWastes = yield (0, CollectorServices_1.getWastes)(location);
         res.status(200).json({
             status: 'success',
