@@ -406,7 +406,7 @@ const getPickers = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const {
       location,
-    } = await getPickerValidationSchema.validateAsync(req.params.location);
+    } = await getPickerValidationSchema.validateAsync({location: req.params.location});
 
     const foundPickers = await getAllP(location);
 

@@ -246,7 +246,7 @@ const findProducer = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, 
 const getPickers = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const producer = checkProducerIsProvided(req);
-        const { location, } = yield servicesValidationSchema_1.getPickerValidationSchema.validateAsync(req.params.location);
+        const { location, } = yield servicesValidationSchema_1.getPickerValidationSchema.validateAsync({ location: req.params.location });
         const foundPickers = yield (0, ProducerServices_1.getAllP)(location);
         if (!foundPickers) {
             throw new Error(" An error occurred");
