@@ -267,14 +267,14 @@ const getPickers = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, fu
 const getWastes = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const producer = checkProducerIsProvided(req);
-        const foundPickers = yield (0, ProducerServices_1.getMyWastes)(producer);
-        if (!foundPickers) {
+        const foundWastes = yield (0, ProducerServices_1.getMyWastes)(producer);
+        if (!foundWastes) {
             throw new Error(" An error occurred");
         }
         res.status(200).json({
             status: 'success',
-            message: "Pickers found",
-            data: foundPickers,
+            message: "Wastes found",
+            data: foundWastes,
         });
     }
     catch (error) {

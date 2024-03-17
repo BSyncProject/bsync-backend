@@ -279,8 +279,9 @@ function getAllP(location) {
 exports.getAllP = getAllP;
 function getMyWastes(producer) {
     return __awaiter(this, void 0, void 0, function* () {
-        const wastes = yield wasteRepository.findWastesByProducer(producer);
-        return wastes;
+        const wastes = yield wasteRepository.getAll();
+        const myWastes = wastes.filter(waste => waste.producer._id.toString() === producer._id.toString() && !waste.isSold);
+        return myWastes;
     });
 }
 exports.getMyWastes = getMyWastes;

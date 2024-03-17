@@ -8,7 +8,7 @@ class WalletRepository {
 
   async findOne(username: string): Promise<Wallet | null> {
 
-    const wallet = await WalletModel.findOne({owner: username});
+    const wallet = await WalletModel.findOne({owner: username}).populate('transactionHistory');
     return wallet;
   }
 
