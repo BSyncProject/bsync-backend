@@ -3,6 +3,11 @@ import { Waste, WasteModel } from '../models/Waste'; // Assuming Waste model is 
 
 class WasteRepository {
 
+  async markAsSold(wasteId: string) {
+    const waste = this.update(wasteId, {isSold: true});
+    return waste;
+  }
+
   async create(wasteData: Partial<Waste>): Promise<Waste> {
     const newWaste = await WasteModel.create(wasteData);
     return newWaste;

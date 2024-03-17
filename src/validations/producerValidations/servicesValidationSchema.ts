@@ -102,3 +102,6 @@ export const resetWalletPinValidationSchema = Joi.object().keys({
   newPin: Joi.string().required(),
 })
 
+export const markWasteValidationSchema = Joi.object().keys({
+  wasteId: Joi.string().required(),
+})

@@ -377,3 +377,10 @@ export async function resetWalletPinProducer(producer: Producer, token: string, 
   return "Wallet pin reset successful";
 
 }
+
+export async function markWasteAsSold(wasteId: string){
+
+  const waste = await wasteRepository.markAsSold(wasteId);
+  return waste;
+  
+}
