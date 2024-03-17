@@ -22,6 +22,7 @@ const {
   resetWalletPin,
   forgotWalletPin,
   getUser,
+  markSold,
 
 } = require('../controllers/ProducerController');
 
@@ -50,6 +51,7 @@ router.get('/pickers/:location', getPickers);
 router.post('/wallet/update', updateWalletPin);
 router.post('/wallet/resetPin', resetWalletPin);
 router.post('wallet/forgotPin', forgotWalletPin);
+router.post('/sold', markSold);
 
 
 module.exports = router;

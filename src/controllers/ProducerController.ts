@@ -16,6 +16,7 @@ import {
   updateProducerWalletPin,
   resetWalletPinProducer,
   forgotWalletPinProducer,
+  markWasteAsSold,
 
  } from '../services/ProducerServices';
 import {signToken} from '../utils/tokenUtils'
@@ -40,6 +41,7 @@ import {
   resetPasswordValidationSchema,
   updatePickerValidationSchema,
   resetWalletPinValidationSchema,
+  markWasteValidationSchema,
 
 } from '../validations/producerValidations/servicesValidationSchema';
 import { Producer } from '../models/Producer';
@@ -606,6 +608,28 @@ const getUser = catchAsync(async(req: CustomRequest, res: Response) => {
   }
 })
 
+const markSold = catchAsync(async(req: CustomRequest, res: Response) => {
+  try{
+    const producer: Producer = checkProducerIsProvided(req);
+    const {wasteId} = await markWasteValidationSchema.validateAsync(req.body);
+
+    const response = await markWasteAsSold(wasteId);
+    if(!response) {throw new Error("An error occurred");}
+
+    res.status(200).json({
+      status: "success",
+      message: "waste marked as sold",
+    })
+
+  } catch(error: any){
+    res.status(500).json({
+      status: 'failed',
+      message: `${error.message}`,
+    })
+
+  }
+})
+
 
 module.exports = {
   signUpProducer,
@@ -628,6 +652,7 @@ module.exports = {
   resetWalletPin,
   forgotWalletPin,
   getUser,
+  markSold,
 
 };
 
