@@ -14,7 +14,7 @@ class WasteRepository {
   }
 
   async findWastesByProducer(producer: Producer): Promise<Waste[]> {
-    const wastes = await WasteModel.find({ producer: producer._id, isSold: false}).lean();
+    const wastes = await WasteModel.find({ producer: producer, isSold: false}).exec();
     return wastes;
   }
 

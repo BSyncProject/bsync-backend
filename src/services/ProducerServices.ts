@@ -322,8 +322,12 @@ export async function getAllP(location: string): Promise<Picker[]> {
 
 export async function getMyWastes(producer: Producer): Promise<Waste[]> {
 
-  const wastes = await wasteRepository.findWastesByProducer(producer);
-  return wastes
+  const wastes = await wasteRepository.getAll();
+  const myWastes = wastes.filter(waste => 
+    waste.producer._id.toString() === producer._id.toString() && !waste.isSold
+  );
+
+  return myWastes;
 }
 
 export async function updateProducerWalletPin(producer: Producer, oldPin: string, newPin: string){

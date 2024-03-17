@@ -25,7 +25,7 @@ class WasteRepository {
     }
     findWastesByProducer(producer) {
         return __awaiter(this, void 0, void 0, function* () {
-            const wastes = yield Waste_1.WasteModel.find({ producer: producer._id, isSold: false }).lean();
+            const wastes = yield Waste_1.WasteModel.find({ producer: producer, isSold: false }).exec();
             return wastes;
         });
     }

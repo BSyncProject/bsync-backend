@@ -435,17 +435,16 @@ const getWastes = catchAsync(async (req: CustomRequest, res: Response) => {
 
     const producer: Producer = checkProducerIsProvided(req);
 
-    const foundPickers = await getMyWastes(producer);
+    const foundWastes = await getMyWastes(producer);
 
-
-    if (!foundPickers) {
+    if (!foundWastes) {
       throw new Error(" An error occurred")
     }
 
     res.status(200).json({
       status: 'success',
-      message: "Pickers found",
-      data: foundPickers,
+      message: "Wastes found",
+      data: foundWastes,
     });
 
   } catch(error:any){
