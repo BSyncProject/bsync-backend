@@ -11,6 +11,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const Waste_1 = require("../models/Waste"); // Assuming Waste model is defined
 class WasteRepository {
+    markAsSold(wasteId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const waste = this.update(wasteId, { isSold: true });
+            return waste;
+        });
+    }
     create(wasteData) {
         return __awaiter(this, void 0, void 0, function* () {
             const newWaste = yield Waste_1.WasteModel.create(wasteData);

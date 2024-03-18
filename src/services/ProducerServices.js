@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetWalletPinProducer = exports.forgotWalletPinProducer = exports.updateProducerWalletPin = exports.getMyWastes = exports.getAllP = exports.getProducer = exports.getProducerWallet = exports.reportIssues = exports.makePayment = exports.setWalletPin = exports.makeWithdrawal = exports.verifyProducerDeposit = exports.makeDeposit = exports.deleteWaste = exports.postWaste = exports.login = exports.signUp = void 0;
+exports.markWasteAsSold = exports.resetWalletPinProducer = exports.forgotWalletPinProducer = exports.updateProducerWalletPin = exports.getMyWastes = exports.getAllP = exports.getProducer = exports.getProducerWallet = exports.reportIssues = exports.makePayment = exports.setWalletPin = exports.makeWithdrawal = exports.verifyProducerDeposit = exports.makeDeposit = exports.deleteWaste = exports.postWaste = exports.login = exports.signUp = void 0;
 const _ProducerRepository_1 = __importDefault(require("../repository/ ProducerRepository"));
 const WalletRepository_1 = __importDefault(require("../repository/WalletRepository"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -328,3 +328,10 @@ function resetWalletPinProducer(producer, token, newPin) {
     });
 }
 exports.resetWalletPinProducer = resetWalletPinProducer;
+function markWasteAsSold(wasteId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const waste = yield wasteRepository.markAsSold(wasteId);
+        return waste;
+    });
+}
+exports.markWasteAsSold = markWasteAsSold;

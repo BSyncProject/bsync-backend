@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetWalletPinValidationSchema = exports.updateWalletPinValidationSchema = exports.resetPasswordValidationSchema = exports.checkUsernameValidationSchema = exports.forgotPasswordValidationSchema = exports.searchValidationSchema = exports.makePaymentValidationSchema = exports.setPinValidationSchema = exports.getPickerValidationSchema = exports.wasteAvailabilityValidationSchema = exports.finalizeWithdrawalValidationSchema = exports.updatePickerValidationSchema = exports.deletePickerValidationSchema = exports.addPickerValidationSchema = exports.verifyDepositValidationSchema = exports.depositValidationSchema = exports.deleteWasteValidationSchema = exports.withdrawalValidationSchema = exports.postWasteValidationSchema = void 0;
+exports.markWasteValidationSchema = exports.resetWalletPinValidationSchema = exports.updateWalletPinValidationSchema = exports.resetPasswordValidationSchema = exports.checkUsernameValidationSchema = exports.forgotPasswordValidationSchema = exports.searchValidationSchema = exports.makePaymentValidationSchema = exports.setPinValidationSchema = exports.getPickerValidationSchema = exports.wasteAvailabilityValidationSchema = exports.finalizeWithdrawalValidationSchema = exports.updatePickerValidationSchema = exports.deletePickerValidationSchema = exports.addPickerValidationSchema = exports.verifyDepositValidationSchema = exports.depositValidationSchema = exports.deleteWasteValidationSchema = exports.withdrawalValidationSchema = exports.postWasteValidationSchema = void 0;
 const Joi = require('joi');
 exports.postWasteValidationSchema = Joi.object().keys({
     quantity: Joi.string().required(),
@@ -77,4 +77,7 @@ exports.updateWalletPinValidationSchema = Joi.object().keys({
 exports.resetWalletPinValidationSchema = Joi.object().keys({
     token: Joi.string().required(),
     newPin: Joi.string().required(),
+});
+exports.markWasteValidationSchema = Joi.object().keys({
+    wasteId: Joi.string().required(),
 });

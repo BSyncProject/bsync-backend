@@ -395,6 +395,26 @@ const getUser = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, funct
         });
     }
 }));
+const markSold = catchAsync((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const producer = checkProducerIsProvided(req);
+        const { wasteId } = yield servicesValidationSchema_1.markWasteValidationSchema.validateAsync(req.body);
+        const response = yield (0, ProducerServices_1.markWasteAsSold)(wasteId);
+        if (!response) {
+            throw new Error("An error occurred");
+        }
+        res.status(200).json({
+            status: "success",
+            message: "waste marked as sold",
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            status: 'failed',
+            message: `${error.message}`,
+        });
+    }
+}));
 module.exports = {
     signUpProducer,
     loginProducer,
@@ -416,4 +436,5 @@ module.exports = {
     resetWalletPin,
     forgotWalletPin,
     getUser,
+    markSold,
 };
