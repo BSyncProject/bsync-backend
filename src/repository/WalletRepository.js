@@ -19,7 +19,7 @@ class WalletRepository {
     }
     findOne(username) {
         return __awaiter(this, void 0, void 0, function* () {
-            const wallet = yield Wallet_1.WalletModel.findOne({ owner: username }).populate('transactionHistory');
+            const wallet = yield Wallet_1.WalletModel.findOne({ owner: username });
             return wallet;
         });
     }
