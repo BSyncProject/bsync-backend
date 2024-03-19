@@ -166,7 +166,11 @@ export async function verifyProducerDeposit(amount: number, reference: string, p
 }
 
 function checkWalletPin(walletPin: string, hashedPin: string) {
-  if (!(compare(walletPin, hashedPin))) {
+  if (!walletPin || walletPin.length < 4 || walletPin.length > 4) {
+    throw new Error("Invalid wallet pin");
+  }
+
+  if (!compare(walletPin, hashedPin)) {
     throw new Error("Wallet Pin incorrect");
   }
 }

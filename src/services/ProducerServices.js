@@ -149,7 +149,10 @@ function verifyProducerDeposit(amount, reference, producer) {
 }
 exports.verifyProducerDeposit = verifyProducerDeposit;
 function checkWalletPin(walletPin, hashedPin) {
-    if (!(compare(walletPin, hashedPin))) {
+    if (!walletPin || walletPin.length < 4 || walletPin.length > 4) {
+        throw new Error("Invalid wallet pin");
+    }
+    if (!compare(walletPin, hashedPin)) {
         throw new Error("Wallet Pin incorrect");
     }
 }
