@@ -165,12 +165,13 @@ export async function verifyProducerDeposit(amount: number, reference: string, p
   return wallet;
 }
 
-function checkWalletPin(walletPin: string, hashedPin: string) {
+async function checkWalletPin(walletPin: string, hashedPin: string) {
   if (!walletPin || walletPin.length < 4 || walletPin.length > 4) {
     throw new Error("Invalid wallet pin");
   }
 
-  if (!compare(walletPin, hashedPin)) {
+  const isMatch: Boolean = await compare(walletPin, hashedPin);
+  if(!isMatch){
     throw new Error("Wallet Pin incorrect");
   }
 }
@@ -215,7 +216,7 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
       throw new Error('Producer does not have a wallet');
     }
 
-    checkWalletPin(walletPin, wallet.pin);
+    await checkWalletPin(walletPin, wallet.pin);
 
     if(wallet.balance < amount){
       throw new Error("Insufficient Balance");

@@ -149,12 +149,15 @@ function verifyProducerDeposit(amount, reference, producer) {
 }
 exports.verifyProducerDeposit = verifyProducerDeposit;
 function checkWalletPin(walletPin, hashedPin) {
-    if (!walletPin || walletPin.length < 4 || walletPin.length > 4) {
-        throw new Error("Invalid wallet pin");
-    }
-    if (!compare(walletPin, hashedPin)) {
-        throw new Error("Wallet Pin incorrect");
-    }
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!walletPin || walletPin.length < 4 || walletPin.length > 4) {
+            throw new Error("Invalid wallet pin");
+        }
+        const isMatch = yield compare(walletPin, hashedPin);
+        if (!isMatch) {
+            throw new Error("Wallet Pin incorrect");
+        }
+    });
 }
 const checkTransactionReference = (reference) => __awaiter(void 0, void 0, void 0, function* () {
     const transaction = yield transactionRepository.findOne(reference);
@@ -190,7 +193,7 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, producer, wallet
             if (!wallet) {
                 throw new Error('Producer does not have a wallet');
             }
-            checkWalletPin(walletPin, wallet.pin);
+            yield checkWalletPin(walletPin, wallet.pin);
             if (wallet.balance < amount) {
                 throw new Error("Insufficient Balance");
             }

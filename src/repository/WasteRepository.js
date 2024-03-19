@@ -25,7 +25,7 @@ class WasteRepository {
     }
     findWastesWithAddress(address) {
         return __awaiter(this, void 0, void 0, function* () {
-            const wastes = yield Waste_1.WasteModel.find({ location: address }).exec();
+            const wastes = yield Waste_1.WasteModel.find({ location: address }).populate('producer').exec();
             return wastes;
         });
     }

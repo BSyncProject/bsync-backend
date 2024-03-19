@@ -149,9 +149,8 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
 
     const wallet = await walletRepository.findOne(collector.username);
     
-    if(!wallet){ throw new Error('Collector does not have a wallet'); }
-    checkWalletPin(walletPin, wallet.pin);
-
+    if(!wallet){ throw new Error('Collector does not have a wallet');}
+    await checkWalletPin(walletPin, wallet.pin);
 
     if(wallet.balance < amount){
       throw new Error("Insufficient Fund");
@@ -217,7 +216,7 @@ export async function makePayment(collector: Collector, producerUsername: string
     throw new Error('Wallet not found')
   }
 
-  checkWalletPin(walletPin, senderWallet.pin);
+  await checkWalletPin(walletPin, senderWallet.pin);
   
   if(senderWallet.balance < amount){
     throw new Error('Insufficient Balance');
@@ -238,14 +237,16 @@ export async function makePayment(collector: Collector, producerUsername: string
   return "Successful";
 }
 
-function checkWalletPin(walletPin: string, hashedPin: string) {
+async function checkWalletPin(walletPin: string, hashedPin: string) {
   if (!walletPin || walletPin.length < 4 || walletPin.length > 4) {
     throw new Error("Invalid wallet pin");
   }
 
-  if (!compare(walletPin, hashedPin)) {
+  const isMatch: Boolean = await compare(walletPin, hashedPin);
+  if(!isMatch){
     throw new Error("Wallet Pin incorrect");
   }
+
 }
 
 export async function getCollectorWallet(collector: Collector): Promise<Wallet>{
