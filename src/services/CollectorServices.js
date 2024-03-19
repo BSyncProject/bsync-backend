@@ -137,7 +137,7 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, collector, walle
             if (!wallet) {
                 throw new Error('Collector does not have a wallet');
             }
-            checkWalletPin(walletPin, wallet.pin);
+            yield checkWalletPin(walletPin, wallet.pin);
             if (wallet.balance < amount) {
                 throw new Error("Insufficient Fund");
             }
@@ -187,7 +187,7 @@ function makePayment(collector, producerUsername, amount, walletPin) {
         if (!senderWallet || !receiverWallet) {
             throw new Error('Wallet not found');
         }
-        checkWalletPin(walletPin, senderWallet.pin);
+        yield checkWalletPin(walletPin, senderWallet.pin);
         if (senderWallet.balance < amount) {
             throw new Error('Insufficient Balance');
         }
@@ -204,12 +204,15 @@ function makePayment(collector, producerUsername, amount, walletPin) {
 }
 exports.makePayment = makePayment;
 function checkWalletPin(walletPin, hashedPin) {
-    if (!walletPin || walletPin.length < 4 || walletPin.length > 4) {
-        throw new Error("Invalid wallet pin");
-    }
-    if (!compare(walletPin, hashedPin)) {
-        throw new Error("Wallet Pin incorrect");
-    }
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!walletPin || walletPin.length < 4 || walletPin.length > 4) {
+            throw new Error("Invalid wallet pin");
+        }
+        const isMatch = yield compare(walletPin, hashedPin);
+        if (!isMatch) {
+            throw new Error("Wallet Pin incorrect");
+        }
+    });
 }
 function getCollectorWallet(collector) {
     return __awaiter(this, void 0, void 0, function* () {

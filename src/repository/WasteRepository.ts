@@ -14,7 +14,7 @@ class WasteRepository {
   }
 
   async findWastesWithAddress(address: string): Promise<Waste[]>{
-    const wastes = await WasteModel.find({location: address}).exec();
+    const wastes = await WasteModel.find({location: address}).populate('producer').exec();
     return wastes;
   }
 
