@@ -137,7 +137,7 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, collector, walle
             if (!wallet) {
                 throw new Error('Collector does not have a wallet');
             }
-            yield checkWalletPin(walletPin, wallet.pin);
+            checkWalletPin(walletPin, wallet.pin);
             if (wallet.balance < amount) {
                 throw new Error("Insufficient Fund");
             }
@@ -204,7 +204,10 @@ function makePayment(collector, producerUsername, amount, walletPin) {
 }
 exports.makePayment = makePayment;
 function checkWalletPin(walletPin, hashedPin) {
-    if (!(compare(walletPin, hashedPin))) {
+    if (!walletPin || walletPin.length < 4 || walletPin.length > 4) {
+        throw new Error("Invalid wallet pin");
+    }
+    if (!compare(walletPin, hashedPin)) {
         throw new Error("Wallet Pin incorrect");
     }
 }
