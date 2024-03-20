@@ -20,7 +20,7 @@ import PickerRepository from '../repository/PickerRepository';
 import EmailServices from './EmailServices';
 import TokenService from './TokenServices';
 
-
+const { format } = require('date-fns');
 const producerRepository = new ProducerRepository();
 const walletRepository = new WalletRepository();
 const wasteRepository = new WasteRepository();
@@ -279,7 +279,7 @@ export async function makePayment(producer: Producer, collectorUsername: string,
   const senderTransaction = await createTransaction(collector.username, producer.username, `${Date.now()}`, "Debit", amount, String(Date.now()));
   senderWallet.transactionHistory.push(senderTransaction);
 
-  const receiverTransaction = await createTransaction(collector.username, producer.username, `${Date.now()}`, "Credit", amount, String(Date.now()));
+  const receiverTransaction = await createTransaction(collector.username, producer.username, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`, "Credit", amount, String(Date.now()));
   receiverWallet.transactionHistory.push(receiverTransaction);
 
   walletRepository.update(senderWallet._id, senderWallet);

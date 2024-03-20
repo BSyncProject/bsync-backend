@@ -23,6 +23,7 @@ const WasteRepository_1 = __importDefault(require("../repository/WasteRepository
 const ProducerServices_1 = require("./ProducerServices");
 const EmailServices_1 = __importDefault(require("./EmailServices"));
 const TokenServices_1 = __importDefault(require("./TokenServices"));
+const { format } = require('date-fns');
 const collectorRepository = new CollectorRepository_1.default();
 const walletRepository = new WalletRepository_1.default();
 const pickerServices = new PickerServices_1.default();
@@ -193,7 +194,7 @@ function makePayment(collector, producerUsername, amount, walletPin) {
         }
         senderWallet.balance = senderWallet.balance - amount;
         receiverWallet.balance = receiverWallet.balance + amount;
-        const senderTransaction = yield createTransaction(collector.username, producer.username, `${Date.now()}`, "Debit", amount, String(Date.now()));
+        const senderTransaction = yield createTransaction(collector.username, producer.username, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`, "Transfer", amount, String(Date.now()));
         senderWallet.transactionHistory.push(senderTransaction);
         const receiverTransaction = yield createTransaction(collector.username, producer.username, `${Date.now()}`, "Credit", amount, String(Date.now()));
         receiverWallet.transactionHistory.push(receiverTransaction);
