@@ -9,8 +9,12 @@
   "main": "index.js",
   
   "scripts": {
-    "test": "jest",
-    "build": "tsc"
+  
+    
+  "test": "jest",
+  
+    
+  "build": "tsc"
   
   },
   
@@ -39,6 +43,9 @@
   
     
   "cors": "^2.8.5",
+  
+    
+  "date-fns": "^3.6.0",
   
     
   "dotenv": "^16.4.5",
