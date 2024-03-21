@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WalletModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const walletSchema = new mongoose_1.Schema({
-    transactionHistory: [{ type: Object, ref: 'Transaction' }],
+    transactionHistory: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Transaction' }],
     owner: { type: String, required: true },
     balance: { type: Number, required: true },
     pin: { type: String },
