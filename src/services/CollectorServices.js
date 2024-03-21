@@ -117,8 +117,8 @@ function verifyCollectorDeposit(amount, reference, collector) {
             throw new Error("Wallet not Found");
         }
         yield checkTransactionReference(reference);
-        const transaction = yield createTransaction(collector.username, "BSYNC", reference, "Deposit", amount, String(Date.now()));
-        wallet.balance = wallet.balance += amount;
+        const transaction = yield createTransaction(collector.username, "BSYNC", reference, "Deposit", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
+        wallet.balance = wallet.balance + amount;
         wallet.transactionHistory.push(transaction);
         walletRepository.update(wallet._id, wallet);
         return wallet;
@@ -194,9 +194,9 @@ function makePayment(collector, producerUsername, amount, walletPin) {
         }
         senderWallet.balance = senderWallet.balance - amount;
         receiverWallet.balance = receiverWallet.balance + amount;
-        const senderTransaction = yield createTransaction(collector.username, producer.username, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`, "Transfer", amount, String(Date.now()));
+        const senderTransaction = yield createTransaction(collector.username, producer.username, String(Date.now()), "Transfer", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
         senderWallet.transactionHistory.push(senderTransaction);
-        const receiverTransaction = yield createTransaction(collector.username, producer.username, `${Date.now()}`, "Credit", amount, String(Date.now()));
+        const receiverTransaction = yield createTransaction(collector.username, producer.username, `${Date.now()}`, "Credit", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
         receiverWallet.transactionHistory.push(receiverTransaction);
         walletRepository.update(senderWallet._id, senderWallet);
         walletRepository.update(receiverWallet._id, receiverWallet);

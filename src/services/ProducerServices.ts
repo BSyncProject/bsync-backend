@@ -157,7 +157,7 @@ export async function verifyProducerDeposit(amount: number, reference: string, p
 
   // await checkTransactionReference(reference);
   
-  const transaction = await createTransaction(producer.username, "BSYNC", reference, "Deposit", amount, String(Date.now()));
+  const transaction = await createTransaction(producer.username, "BSYNC", reference, "Deposit", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
   wallet.balance = wallet.balance + amount;
   wallet.transactionHistory.push(transaction);
   walletRepository.update(wallet._id, wallet);
@@ -276,10 +276,10 @@ export async function makePayment(producer: Producer, collectorUsername: string,
   senderWallet.balance = senderWallet.balance - amount;
   receiverWallet.balance = receiverWallet.balance + amount; 
 
-  const senderTransaction = await createTransaction(collector.username, producer.username, `${Date.now()}`, "Debit", amount, String(Date.now()));
+  const senderTransaction = await createTransaction(collector.username, producer.username, String(Date.now()), "Debit", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
   senderWallet.transactionHistory.push(senderTransaction);
 
-  const receiverTransaction = await createTransaction(collector.username, producer.username, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`, "Credit", amount, String(Date.now()));
+  const receiverTransaction = await createTransaction(collector.username, producer.username, String(Date.now()), "Credit", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
   receiverWallet.transactionHistory.push(receiverTransaction);
 
   walletRepository.update(senderWallet._id, senderWallet);
@@ -287,7 +287,6 @@ export async function makePayment(producer: Producer, collectorUsername: string,
   return "Successful"
 
 }
-
 
 export async function reportIssues(comment: string, type: string, date: string, provider: Producer ){
 

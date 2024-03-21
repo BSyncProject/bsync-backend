@@ -130,8 +130,8 @@ export async function verifyCollectorDeposit(amount: number,reference: string, c
   }
 
   await checkTransactionReference(reference);
-  const transaction = await createTransaction(collector.username, "BSYNC", reference, "Deposit", amount, String(Date.now()));
-  wallet.balance = wallet.balance += amount;
+  const transaction = await createTransaction(collector.username, "BSYNC", reference, "Deposit", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
+  wallet.balance = wallet.balance + amount;
   wallet.transactionHistory.push(transaction);
   walletRepository.update(wallet._id, wallet);
 
@@ -226,10 +226,10 @@ export async function makePayment(collector: Collector, producerUsername: string
   senderWallet.balance = senderWallet.balance - amount;
   receiverWallet.balance = receiverWallet.balance + amount; 
 
-  const senderTransaction = await createTransaction(collector.username, producer.username, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`, "Transfer", amount, String(Date.now()));
+  const senderTransaction = await createTransaction(collector.username, producer.username, String(Date.now()), "Transfer", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
   senderWallet.transactionHistory.push(senderTransaction);
 
-  const receiverTransaction = await createTransaction(collector.username, producer.username, `${Date.now()}`, "Credit", amount, String(Date.now()));
+  const receiverTransaction = await createTransaction(collector.username, producer.username, `${Date.now()}`, "Credit", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
   receiverWallet.transactionHistory.push(receiverTransaction);
 
   walletRepository.update(senderWallet._id, senderWallet);
