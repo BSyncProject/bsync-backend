@@ -20,7 +20,7 @@ import PickerRepository from '../repository/PickerRepository';
 import EmailServices from './EmailServices';
 import TokenService from './TokenServices';
 
-const { format } = require('date-fns');
+import { format } from 'date-fns';
 const producerRepository = new ProducerRepository();
 const walletRepository = new WalletRepository();
 const wasteRepository = new WasteRepository();
@@ -144,18 +144,12 @@ export async function makeDeposit(amount: number, email: string): Promise<any>{
 
 export async function verifyProducerDeposit(amount: number, reference: string, producer: Producer): Promise<any> {
 
-  // const data = await verifyDeposit(amount);
-
-  // if (!data.data || !(data.message == "Verification successful")){
-  //   throw new Error("Verification not successful");
-  // }
-
   const wallet = await walletRepository.findOne(producer.username);
   if(!wallet){
     throw new Error("Wallet not Found");
   }
 
-  // await checkTransactionReference(reference);
+  await checkTransactionReference(reference);
   
   const transaction = await createTransaction(producer.username, "BSYNC", reference, "Deposit", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
   wallet.balance = wallet.balance + amount;
