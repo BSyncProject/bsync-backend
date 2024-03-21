@@ -16,7 +16,7 @@ const wasteSchema: Schema = new Schema({
   location: { type: String, required: true },
   imageLink: { type: String},
   majority: { type: String, required: true },
-  producer: { type: Object, ref: 'Producer', required: true },
+  producer: { type: Schema.Types.ObjectId, ref: 'Producer', required: true },
   datePosted: {type: String},
   isSold: {type: Boolean},
 });
