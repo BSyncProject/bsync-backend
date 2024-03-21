@@ -23,7 +23,7 @@ const WasteRepository_1 = __importDefault(require("../repository/WasteRepository
 const ProducerServices_1 = require("./ProducerServices");
 const EmailServices_1 = __importDefault(require("./EmailServices"));
 const TokenServices_1 = __importDefault(require("./TokenServices"));
-const { format } = require('date-fns');
+const date_fns_1 = require("date-fns");
 const collectorRepository = new CollectorRepository_1.default();
 const walletRepository = new WalletRepository_1.default();
 const pickerServices = new PickerServices_1.default();
@@ -108,16 +108,12 @@ function makeDeposit(amount, email) {
 exports.makeDeposit = makeDeposit;
 function verifyCollectorDeposit(amount, reference, collector) {
     return __awaiter(this, void 0, void 0, function* () {
-        // const data = await verifyDeposit(reference);
-        // if (!data.data || !(data.message == "Verification successful")){
-        //   throw new Error("Verification not successful");
-        // }
         const wallet = yield walletRepository.findOne(collector.username);
         if (!wallet) {
             throw new Error("Wallet not Found");
         }
         yield checkTransactionReference(reference);
-        const transaction = yield createTransaction(collector.username, "BSYNC", reference, "Deposit", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
+        const transaction = yield createTransaction(collector.username, "BSYNC", reference, "Deposit", amount, `${(0, date_fns_1.format)(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
         wallet.balance = wallet.balance + amount;
         wallet.transactionHistory.push(transaction);
         walletRepository.update(wallet._id, wallet);
@@ -149,9 +145,9 @@ function makeWithdrawal(name, accountNumber, bank_code, amount, collector, walle
                 throw new Error("An Error occurred");
             }
             yield checkTransactionReference(withdrawData.data.reference);
-            const transaction = createTransaction("Bsync", collector.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount / 100, withdrawData.data.createdAt);
+            const transaction = yield createTransaction("Bsync", collector.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount / 100, withdrawData.data.createdAt);
             wallet.balance = wallet.balance - (withdrawData.data.amount / 100);
-            wallet.transactionHistory.push((yield transaction));
+            wallet.transactionHistory.push(transaction);
             walletRepository.update(wallet._id, wallet);
             return withdrawData;
         }
@@ -168,17 +164,19 @@ const checkTransactionReference = (reference) => __awaiter(void 0, void 0, void 
     }
 });
 function createTransaction(sender, receiver, reference, type, amount, date) {
-    const transactionData = {
-        sender: sender,
-        type: type,
-        receiver: receiver,
-        amount: amount,
-        reference: reference,
-        comment: type,
-        date: date,
-    };
-    const transaction = transactionRepository.create(transactionData);
-    return transaction;
+    return __awaiter(this, void 0, void 0, function* () {
+        const transactionData = {
+            sender: sender,
+            type: type,
+            receiver: receiver,
+            amount: amount,
+            reference: reference,
+            comment: type,
+            date: date,
+        };
+        const transaction = yield transactionRepository.create(transactionData);
+        return transaction;
+    });
 }
 function makePayment(collector, producerUsername, amount, walletPin) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -194,9 +192,9 @@ function makePayment(collector, producerUsername, amount, walletPin) {
         }
         senderWallet.balance = senderWallet.balance - amount;
         receiverWallet.balance = receiverWallet.balance + amount;
-        const senderTransaction = yield createTransaction(collector.username, producer.username, String(Date.now()), "Transfer", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
+        const senderTransaction = yield createTransaction(collector.username, producer.username, String(Date.now()), "Transfer", amount, `${(0, date_fns_1.format)(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
         senderWallet.transactionHistory.push(senderTransaction);
-        const receiverTransaction = yield createTransaction(collector.username, producer.username, `${Date.now()}`, "Credit", amount, `${format(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
+        const receiverTransaction = yield createTransaction(collector.username, producer.username, `${Date.now()}`, "Credit", amount, `${(0, date_fns_1.format)(Date.now(), 'yyyy-MM-dd HH:mm:ss')}`);
         receiverWallet.transactionHistory.push(receiverTransaction);
         walletRepository.update(senderWallet._id, senderWallet);
         walletRepository.update(receiverWallet._id, receiverWallet);

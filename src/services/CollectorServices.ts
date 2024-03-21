@@ -19,8 +19,7 @@ import { Waste } from '../models/Waste';
 import { getProducer } from './ProducerServices';
 import EmailServices from './EmailServices';
 import TokenService from './TokenServices';
-
-const { format } = require('date-fns');
+import { format } from 'date-fns';
 const collectorRepository = new CollectorRepository();
 const walletRepository = new WalletRepository();
 const pickerServices  = new PickerServices();
@@ -118,12 +117,6 @@ export async function makeDeposit(amount: number, email: string): Promise<any>{
 
 export async function verifyCollectorDeposit(amount: number,reference: string, collector: Collector): Promise<any> {
 
-  // const data = await verifyDeposit(reference);
-
-  // if (!data.data || !(data.message == "Verification successful")){
-  //   throw new Error("Verification not successful");
-  // }
-
   const wallet = await walletRepository.findOne(collector.username);
   if(!wallet){
     throw new Error("Wallet not Found");
@@ -168,10 +161,10 @@ export async function makeWithdrawal(name: string, accountNumber: string, bank_c
   
     await checkTransactionReference(withdrawData.data.reference);
     
-    const transaction = createTransaction("Bsync",collector.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount/100, withdrawData.data.createdAt);
+    const transaction = await createTransaction("Bsync",collector.username, withdrawData.data.reference, "Withdrawal", withdrawData.data.amount/100, withdrawData.data.createdAt);
   
     wallet.balance = wallet.balance - (withdrawData.data.amount / 100);
-    wallet.transactionHistory.push((await transaction));
+    wallet.transactionHistory.push(transaction);
     walletRepository.update(wallet._id, wallet);
     
     return withdrawData;
@@ -192,7 +185,7 @@ const checkTransactionReference = async(reference: string): Promise<void> => {
   
 }
 
-function createTransaction(sender: string, receiver: string, reference: string, type: string, amount: number, date: string) {
+async function createTransaction(sender: string, receiver: string, reference: string, type: string, amount: number, date: string) {
   const transactionData: Partial<Transaction> = {
     sender: sender,
     type: type,
@@ -202,7 +195,7 @@ function createTransaction(sender: string, receiver: string, reference: string, 
     comment: type,
     date: date,
   };
-  const transaction = transactionRepository.create(transactionData);
+  const transaction = await transactionRepository.create(transactionData);
   return transaction;
 }
 

@@ -10,7 +10,7 @@ export interface Wallet extends Document {
 }
 
 const walletSchema: Schema = new Schema({
-  transactionHistory: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }],
+  transactionHistory: [{ type: Schema.Types.ObjectId, ref: 'Transaction', default: [] }],
   owner: { type: String, required: true },
   balance: { type: Number, required: true },
   pin: { type: String},
